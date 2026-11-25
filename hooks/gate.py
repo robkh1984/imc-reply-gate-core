@@ -1638,6 +1638,18 @@ def main():
             set_pending(session, None)
         except Exception:
             pass
+        if not tinfo:
+            # core serial 3 (OI-0786, 2026-11-24): measured in session 05185df0 - three closing lines of 425, 435
+            # and 479 characters, with no table, drew the message below, which said a TABLE was unstamped, so
+            # Claude told Rob a stamped table had gone out unchecked. Name the real failure instead.
+            sys.stderr.write("imc-reply-gate blocked this reply (%d of %d this turn). "
+                             "THE BLOCKED TEXT IS ALREADY ON ROB'S SCREEN. This closing text has no table; it is %d "
+                             "characters, over the %d-character limit for unstamped text (PRECHECK-MISSING). This block "
+                             "is about the closing text only and says nothing about any table sent earlier this "
+                             "turn. Send NO further text this turn. From the next reply on, keep the "
+                             "closing line at %d characters or fewer, or precheck it.\n"
+                             % (n, MAX_BLOCKS, len(text.strip()), PROGRESS_MAX, PROGRESS_MAX))
+            sys.exit(2)
         sys.stderr.write("imc-reply-gate blocked this reply (%d of %d this turn). "
                          "THE BLOCKED TEXT IS ALREADY ON ROB'S SCREEN. Its next-steps table was sent without a "
                          "precheck.py stamp for the exact text (PRECHECK-MISSING). Do NOT resend the table. Send "

@@ -1,8 +1,8 @@
 {
- "version": "0.4.0",
- "serial": 2,
+ "version": "0.4.1",
+ "serial": 3,
  "files": {
-  ".claude-plugin/plugin.json": "a5c1dc506129a3527a51d5dbaf870a6a78bec2e73e2b78e759ee522fde49b69e",
+  ".claude-plugin/plugin.json": "1c712b68cd8f762e755f10d90c6c3808faa27a074a93faa8d8f99903d72417d6",
   "CORE-RELEASE.txt": "3efc58a7b9f1f6ae125ff18000d8b44a3a80e232936db2fbf3b4fab0684c4cff",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
@@ -13,6 +13,7 @@
   "checker/checks-registry.txt": "24480817f150647418d8f543db91c1095ed8af8da8747bb2315b1eb4fc2ba6b0",
   "checker/claudeowned_selftest.py": "18cb8548691971ce14b9940a877424cdb9dd7266dae06593fa573c2a0dd5ddcd",
   "checker/closingcheck.py": "b571fcf5f11bc8c0d4d55184d84dc1e381b1df7f86e65cd935cb563e58d83c12",
+  "checker/closingunstamped_selftest.py": "cd0bd1b56c3865d7b23c3bafb76c601cfe242935a9a253a9bd4f7b5cd32e3586",
   "checker/corrwaiver_selftest.py": "0f281f191f95bc3620c2f72f08bbe67635f034357449d8cdff30e427dff2d66b",
   "checker/exception_selftest.py": "7fcc2453fd9af5427dd0297c3eedd63775b1420b5e1c89515b87d324fc61b672",
   "checker/fieldclaimcheck.py": "fa6860fc6b75af9f7b791e3755f11db5bc27939a4e70d11945ce1446edcf2b34",
@@ -46,7 +47,7 @@
   "hooks/agentguard.py": "85d5af78f0c372a001d3ada6f6965f6a88aaff90ce2784177e1de9b2ce3786ec",
   "hooks/approvalledger.py": "6ab384d2f80cbced14544d6d58056d2f7a350f465f0ece49fe14b01b1926478e",
   "hooks/editlogguard.py": "424ae9c878619ddbd3b64c093d29c9b072e00c02c5abf0f4292d25d093627262",
-  "hooks/gate.py": "7cd7725c87c9c48d3139651920370ce4eb45c056af1e03ca152988726de13471",
+  "hooks/gate.py": "fefdcf92dfe6ee4484743bd0dcbba1d5a6dcf2ba41135714f9df610d2c06f712",
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
   "hooks/intakeguard.py": "d58263ecb84beb235e2337799e9e4537e851b10a00cd8687aa203c681bf4d131",
   "hooks/preaction.py": "53c4992ee60f64d815a10ecbf97f10b51a0f6d9a719e712da514c36f0dbd28e7",
