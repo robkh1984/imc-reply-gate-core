@@ -1,8 +1,8 @@
 {
- "version": "0.4.2",
- "serial": 4,
+ "version": "0.4.3",
+ "serial": 5,
  "files": {
-  ".claude-plugin/plugin.json": "3b40d2b3e8a5cce8d3f9b5d970ebedf13fe43d125c95c64c3ceacf2ebc43f1b9",
+  ".claude-plugin/plugin.json": "d2691e22f907bb02cefc341f3ff525acb909d8285a37b64f7660256b797e94b8",
   "CORE-RELEASE.txt": "3efc58a7b9f1f6ae125ff18000d8b44a3a80e232936db2fbf3b4fab0684c4cff",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
@@ -50,7 +50,7 @@
   "hooks/editlogguard.py": "424ae9c878619ddbd3b64c093d29c9b072e00c02c5abf0f4292d25d093627262",
   "hooks/gate.py": "751770a2478f1c8caeea1e1ac81c1a8f7e70e5f07a730f734e450b770280eab2",
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
-  "hooks/intakeguard.py": "d58263ecb84beb235e2337799e9e4537e851b10a00cd8687aa203c681bf4d131",
+  "hooks/intakeguard.py": "45175977a622f0eebfdc6637c4fb86f7c8e971ba7cecbc68ac78bb1a34b1d2dc",
   "hooks/preaction.py": "53c4992ee60f64d815a10ecbf97f10b51a0f6d9a719e712da514c36f0dbd28e7",
   "hooks/reviewpanel.py": "374ecdfbeec9f2f745d04dba32c9f1064f56a28c72166dba5228c320ab2209cb"
  }
