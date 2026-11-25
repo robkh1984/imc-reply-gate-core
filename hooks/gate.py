@@ -1327,6 +1327,47 @@ def answer_promise_fails(mode, tp, session, text):
     return out
 
 
+PRECHECK_SHIM = """#!/usr/bin/env python3
+# Written by imc-reply-gate core serial 7 (OI-0794, 2026-11-25) at every session start. Task prompts written before the
+# loader run "$(ls -d /root/.claude/plugins/synced/*/imc-reply-gate*/checker/precheck.py | head -1)"; the loader layout
+# had no such file. This runs the loader's current cached precheck, or the copy bundled under core/.
+import os, pathlib, sys
+plugin = pathlib.Path(__file__).resolve().parent.parent
+cache = pathlib.Path.home() / ".claude" / "imc-reply-gate-core"
+root = plugin / "core"
+try:
+    cur = (cache / "current").read_text(encoding="utf-8").strip()
+    if cur and (cache / cur / "checker" / "precheck.py").is_file():
+        root = cache / cur
+except OSError:
+    pass
+os.environ["CLAUDE_PLUGIN_ROOT"] = str(root)
+os.execv(sys.executable, [sys.executable, str(root / "checker" / "precheck.py")] + sys.argv[1:])
+"""
+
+
+def ensure_precheck_shim(plugin=None):
+    """core serial 7 (OI-0794 (three task prompts call a removed precheck path)): no plug-in update needed. The loader
+    passes its own folder in IMC_GATE_LOADER_PLUGIN; write <plugin>/checker/precheck.py when it is missing or differs.
+    Never raises: a session start must not fail over this. Returns 'written', 'present' or the reason it did nothing."""
+    try:
+        plugin = plugin or os.environ.get("IMC_GATE_LOADER_PLUGIN", "")
+        if not plugin or not os.path.isfile(os.path.join(plugin, "loader.py")):
+            return "no loader plug-in"
+        d = os.path.join(plugin, "checker")
+        f = os.path.join(d, "precheck.py")
+        if os.path.isfile(f) and open(f, encoding="utf-8").read() == PRECHECK_SHIM:
+            return "present"
+        os.makedirs(d, exist_ok=True)
+        tmp = f + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            fh.write(PRECHECK_SHIM)
+        os.replace(tmp, f)
+        return "written"
+    except Exception as e:  # noqa: BLE001
+        return "error: %s" % e
+
+
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "?"
     try:
@@ -1334,6 +1375,7 @@ def main():
     except Exception as e:
         allow(mode, "error", detail="bad JSON on stdin: %s" % e)
     if mode == "sessionstart":
+        ensure_precheck_shim()
         sessionstart(payload)
     if mode == "prompt":
         promptreminder(payload)
