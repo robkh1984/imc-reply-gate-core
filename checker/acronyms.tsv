@@ -1,0 +1,79 @@
+# ACRONYM MAP - the ALLOWLIST that drives acronym_check.py. Built 2026-09-10.
+#
+# WHY AN ALLOWLIST AND NOT AN EXCEPTIONS LIST. The industry rule (Microsoft Writing Style
+# Guide, Hyperlint) flags every 3-5 letter capital token and exempts ~50 known-safe ones.
+# MEASURED 2026-09-10 against Rob's live Instructions field: 1,951 matches, 1,926 surviving
+# the 47-entry exceptions list, top hits THE x268, NOT x107, AND x103. His house style shouts
+# for emphasis and English words are 3-5 letters, so a denylist is unusable here. Flagging
+# ONLY tokens on this list makes false positives on emphasis impossible by construction; the
+# failure mode becomes a missed acronym, which is one wrong word, instead of a gate nobody
+# leaves switched on.
+#
+# COLUMNS  token  class  expansion  scope  skip_regex  note
+#   class      expand = must be spelled out at first use in a surface
+#              never  = product/organisation name or universal token; NEVER flag, NEVER expand
+#   scope      *  applies everywhere;  a name  applies only to that surface and WINS over *
+#   skip_regex occurrences matching this are ignored entirely (empty = none)
+#
+# ADDING A ROW BY HAND IS FINE. harvest_acronyms.py appends candidates it finds in text that
+# already expands correctly; those land with source=harvest and want a human glance.
+#
+token	class	expansion	scope	skip_regex	note
+#--- class three: genuine acronyms, expand at first use -------------------------------
+API	expand	application programming interface	*		
+CCS	expand	Combined Charging System	*		charging connector; short form recurs in charging apps
+DC	expand	direct-current	*		as in DC fast-charging
+DSLR	expand	digital single-lens reflex	*		
+EV	expand	Electric Vehicle	*		
+IoT	expand	Internet of Things	*		
+ISP	expand	Internet Service Provider	*		
+JSM	expand	Jira Service Management	*		
+LAN	expand	local area network	*	LAN\s+Setup	
+LiDAR	expand	light-detection-and-ranging	*		
+MCP	expand	Model Context Protocol	*		
+NACS	expand	North American Charging Standard	*		charging connector; short form recurs in charging apps
+NASPA	expand	North American Scrabble Players Association	*	NASPA\s+Word\s+List	
+NWL	expand	NASPA Word List	*		
+SSID	expand	Service Set Identifier	*		
+TPM	expand	Technical Program Manager	*	PM\s*/\s*TPM|PM_TPM	collides with Trusted Platform Module in other domains. skip_regex added 2026-09-10: all 11 TPM flags outside the tuning project were the artifact name 'PM/TPM prompts' or the file PM_TPM_AI_Prompts.
+UI	never		*		RECLASSIFIED 2026-09-13, RULED BY ROB. THE ROW THIS REPLACES READ: 'UI	expand	user interface' - the claude.ai Instructions field was using UI unexpanded four times while ordering itself to expand it, Claude moved the token to the leave-bare class without declaring it, disclosed it, and Rob approved keeping it. The full rule now lives in /preferences.md under ACRONYMS. Leaving this row as 'expand' made the gate FAIL correct output, which is a check reporting a violation that is not one. Prior skip_regex for 'UI/UX' and 'One UI' is no longer needed because the token is never flagged.
+UX	expand	user experience	*	UI\s*[/&]\s*UX	skip_regex added 2026-09-10: both UX flags outside the tuning project were the compound 'UI/UX' or 'UI & UX' inside a document title.
+AI	never		*		MOVED FROM expand TO never 2026-09-10 ON A FOUR-PROJECT MEASUREMENT, AND IT IS ROB'S OWN CLASS-ONE RULE APPLIED RATHER THAN AN EXCEPTION TO IT. Measured across 2789 assistant turns outside the project this gate was tuned on: 123 AI flags, of which about 112 are a PROPER NAME - an Instagram collection literally called AI, plus its AI - rejected and AI - processed siblings, plus content titles such as 5 AI PM Portfolio Projects and 8 AI Skills That Future-Proof Developers. NO SPAN RULE AND NO NAME-FAMILY REGEX CAN FIX THAT, because the name IS the bare token and the family is unbounded - it grows whenever Rob names something. Class one says a name that only looks like an acronym is left alone. The cost is stated and accepted: roughly 11 genuine bare uses across those 2789 turns will no longer flag. FALSIFIER: if artificial intelligence starts appearing unexpanded in INSTRUCTION files, scope an expand row to those surfaces rather than making it global again.
+#--- the collision the whole scope column exists for ----------------------------------
+NPS	expand	Net Promoter Score	*		product-management sense, the glossary default
+NPS	expand	National Park Service	yosemite	 	scope beats the default; a downloaded list would have got this wrong
+#--- product-management glossary seed --------------------------------------------------
+ARR	expand	Annual Recurring Revenue	*		
+B2B	expand	Business-to-Business	*		
+B2C	expand	Business-to-Consumer	*		
+CAC	expand	Customer Acquisition Cost	*		
+KPI	expand	Key Performance Indicator	*		
+MVP	expand	Minimum Viable Product	*		
+OKR	expand	Objectives and Key Results	*		
+PRD	expand	Product Requirements Document	*		
+ROI	expand	Return on Investment	*		
+SaaS	expand	Software as a Service	*	The\s+SaaS\s+CFO	
+VOC	expand	Voice of the Customer	*		
+#--- PM: ruled Product Manager, but the clock usage dominates --------------------------
+PM	expand	Product Manager	*	\d{1,2}(:\d{2})?\s*[*_]{0,2}\s*PM|AI[- ]PM\b|PM\s*/\s*TPM|AM\s*/\s*PM|PM&R	skip_regex drops clock times; the [*_]{0,2} was added 2026-09-10 after 12:30 **PM** in a real reply defeated the original pattern - markdown bold sits between the digits and the token. Also drops 'AI PM' and 'PM/TPM', both measured as parts of artifact names rather than uses. AM/PM added after the four-project re-measure: the last surviving PM flag was the sentence "I'll use AM/PM from here", which names the notation instead of using the acronym.
+#--- class one: product and organisation names. NEVER expand ---------------------------
+GM	never		*		Sony G Master lens designation
+GTX	never		*		Gore-Tex, in HOKA Anacapa Mid GTX
+VIP	never		*		LEGO Insiders programme branding
+OAuth	never		*		a standard's name, not an abbreviation in prose
+BERT	never		*		model name
+BIC	never		*		brand
+REI	never		*		retailer name
+NPR	never		*		
+#--- class two: universal technical tokens. NEVER expand -------------------------------
+URL	never		*		
+HTML	never		*		
+CSS	never		*		
+JSON	never		*		
+PDF	never		*		
+USB	never		*		
+SSD	never		*		
+TB	never		*		
+GB	never		*		
+APFS	never		*		
+AM	never		*		clock time

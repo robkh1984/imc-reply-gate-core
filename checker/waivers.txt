@@ -1,0 +1,17 @@
+# One check code per line. A FAIL whose code is listed here does not block.
+# Waived by Rob's spec, 2026-10-02 (STANDING-ROWS un-waived 2026-10-17, Rob 12:18 PM row 7 "adopt"):
+TEST-FIELD
+RULINGS-CITED
+OPEN-ROW-LINK
+# Approved by Rob 2026-10-02 (APPROVE-1): read files that exist only on his Mac and fire on correct replies elsewhere.
+GATE-RATIO
+LINK-REGISTRY
+LINK-RESOLVES
+# Approved by Rob 2026-10-02 (APPROVE-2): 35 of 40 corpus blocks; fired on replies that cite evidence in prose.
+LEDGER-0
+# Approved by Rob 2026-10-18 2:08 PM PDT ('1. waive replay'): the replay reviewer-prompt check (canary, passes, clause map) blocked about twenty replies without catching a wrong fact. Remove these five lines to restore it.
+REPLAY-NO-RECORD
+REPLAY-NO-CANARY
+REPLAY-NO-REVIEWER
+REPLAY-NO-PASSES
+REPLAY-NO-CLAUSE-MAP

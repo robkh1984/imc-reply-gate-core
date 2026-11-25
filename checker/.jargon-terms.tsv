@@ -1,0 +1,39 @@
+# .jargon-terms.tsv -- phrases Rob has said he could not follow, and the plain words that
+# must appear in the same paragraph when one is used.
+#
+# FORMAT: phrase <TAB> plain-word|plain-word|plain-word
+# The check fails when the phrase appears in a paragraph containing NONE of its plain words.
+# A row with no plain words is ignored rather than honoured, so a half-written entry cannot
+# silently disable the check for that phrase.
+#
+# HOW ENTRIES GET ADDED, AND IT IS THE ONLY WAY: Rob says he cannot follow something. Not a
+# guess about what might confuse a reader -- a recorded instance. All four seed entries are
+# from 2026-08-31.
+#
+# 1. "Rule the key form for scripts" -- he asked what it meant.
+# 2. "rule them exempt ... a permanently red suite" -- he asked what it meant.
+# 3. "its cost profile rather than its verdict carries the proof" -- "I have no idea what
+#    this means."
+# 4. "the cheapest path through the script" -- same paragraph as 3.
+cost profile	how long|seconds|took|time it took|slower|faster
+carries the proof	proves|shows|because|the reason
+cheapest path	fastest|least work|simplest|barely|without
+key form	name|spelled|written as|format of the name
+permanently red	always fails|never passes|stays failing|keeps failing
+rule the	decide|decision|choose|ruling|you decide
+blast radius	how much|how many|what else breaks|scope of damage
+wrong-key	wrong name|wrong column|wrong field|looked up by
+denominator	total|out of|the number it is divided by|population
+ratchet	can go down but not up|may fall, never rise|baseline
+vacuous	always passes|cannot fail|passes even when
+fail-closed	stops rather than|refuses rather than|blocks instead of
+epistemic	what is known|knowing|evidence|fact versus guess
+provenance	where it came from|source|attribution|who wrote it
+idempotent	safe to repeat|running it twice|repeat without
+start-month	which year|the year|month|January|December
+start month	which year|the year|month|January|December
+anchor year	the year|which year|from the PDF|statement year
+sub-block	part of|section|Checking|Savings|half
+per-sub-block	part of|section|Checking|Savings|half
+balance chain	balance|adds up|running total|previous row
+monotonic	in order|forwards|goes backwards|non-decreasing

@@ -1,0 +1,2 @@
+# tool	arg	pattern	qualifier	exceptions	mode	expires	ruling
+mcp__claude-code-remote__delete_trigger	trigger_id	[A-Za-z0-9_-]+	qualified-triggers.json;ended_reason=run_once_fired;persist_session=true	recurring	warn	-	Rob 2026-11-12 11:37 AM PST: Approve your recommendations for items 1 nad 2 (delete any fired one-shot task whose persist_session is true)

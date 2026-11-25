@@ -1,0 +1,3 @@
+# .sent-mismatch-ack.tsv - R114 (Rob 2026-09-29 09:40 PDT "4. Approved"). One row per sent reply that went out different from its stamp.
+# sha16 <TAB> F-number <TAB> ruling <TAB> reason. A row missing any field is ignored. Read by replycheck.check_sent_checked.
+8002dd84371e8b6d	F-279	R114	The 09:05 PDT reply of 2026-09-29 was reworded after stamping: 8,778 characters stamped, 9,488 sent. It cannot be un-sent.
