@@ -1626,9 +1626,14 @@ def main():
             sys.stderr.write("FAIL  [%s] %s\n" % (c, m))
         sys.exit(2)
     if src == "PushNotification":
+        # core serial 4 (OI-0783, 2026-11-24): this branch runs only in PreToolUse mode, and a PreToolUse block
+        # DENIES the call, exactly as 0.3.25 measured for SendUserMessage. MEASURED in a scheduled run that day
+        # (Drive file "OI-0783 push notification diagnostic"): the old text said the blocked notification had
+        # reached Rob's phone and must not be resent, so the run sent nothing and Rob got nothing.
         sys.stderr.write("imc-reply-gate blocked this PushNotification (%d of %d this turn). "
-                         "THE BLOCKED NOTIFICATION REACHED ROB'S PHONE (measured 2026-10-15, OI-0201). Do NOT resend it. "
-                         "Send no follow-up notification and no CORRECTION line. Carry the corrected words at the top of your next reply. Failures:\n" % (n, MAX_BLOCKS))
+                         "NOTHING WAS SENT: a PreToolUse block denies the call, so this notification did NOT reach "
+                         "Rob's phone. Fix the failures below and send the notification once more, corrected. "
+                         "Failures:\n" % (n, MAX_BLOCKS))
         for c, m in live:
             sys.stderr.write("FAIL  [%s] %s\n" % (c, m))
         sys.exit(2)

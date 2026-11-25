@@ -1,8 +1,8 @@
 {
- "version": "0.4.1",
- "serial": 3,
+ "version": "0.4.2",
+ "serial": 4,
  "files": {
-  ".claude-plugin/plugin.json": "1c712b68cd8f762e755f10d90c6c3808faa27a074a93faa8d8f99903d72417d6",
+  ".claude-plugin/plugin.json": "3b40d2b3e8a5cce8d3f9b5d970ebedf13fe43d125c95c64c3ceacf2ebc43f1b9",
   "CORE-RELEASE.txt": "3efc58a7b9f1f6ae125ff18000d8b44a3a80e232936db2fbf3b4fab0684c4cff",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
@@ -26,6 +26,7 @@
   "checker/pipeline_selftest.py": "5238f8317aa911a86d2ba2edacd907f0290010e475b0edbf820cb480ed705144",
   "checker/precheck.py": "ff6b1d2903c3aafddf0f5d9209fa6da710c221d1b706f7fae5fdc6d427fb0c73",
   "checker/presendgate_selftest.py": "2ee23683020200870b473200560d19c8b0db138ae4f8e6aabd5bb263534ba587",
+  "checker/pushdeny_selftest.py": "0a4d4ffb26446bf8d90b5940e7099166ed53db7e8418a3521f905f7aaf8081bb",
   "checker/relevance_selftest.py": "6cd094189dd1b6448b6255b22c05a891a183c87cabba2813e5935bd1b3018192",
   "checker/replaycheck.py": "f2e34eb81fd9c86eb0aa6a56dff52d13129cd89755f840e80bc58f3bacad24fd",
   "checker/replycheck.py": "cff322e9e4d7f1d3a25a539889976fa46ba029efe02a49f30ece1fb2d687e017",
@@ -47,7 +48,7 @@
   "hooks/agentguard.py": "85d5af78f0c372a001d3ada6f6965f6a88aaff90ce2784177e1de9b2ce3786ec",
   "hooks/approvalledger.py": "6ab384d2f80cbced14544d6d58056d2f7a350f465f0ece49fe14b01b1926478e",
   "hooks/editlogguard.py": "424ae9c878619ddbd3b64c093d29c9b072e00c02c5abf0f4292d25d093627262",
-  "hooks/gate.py": "fefdcf92dfe6ee4484743bd0dcbba1d5a6dcf2ba41135714f9df610d2c06f712",
+  "hooks/gate.py": "751770a2478f1c8caeea1e1ac81c1a8f7e70e5f07a730f734e450b770280eab2",
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
   "hooks/intakeguard.py": "d58263ecb84beb235e2337799e9e4537e851b10a00cd8687aa203c681bf4d131",
   "hooks/preaction.py": "53c4992ee60f64d815a10ecbf97f10b51a0f6d9a719e712da514c36f0dbd28e7",
