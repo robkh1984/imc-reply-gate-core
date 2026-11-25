@@ -100,12 +100,38 @@ def count_of(findings):
     return int(m.group(1)) if m else len(re.findall(r"^\s*\d+[.)]\s", findings, re.M))
 
 
+def api_reachable(timeout=6):
+    """0.4.6 (Rob 2026-11-25, Mac Claude Code screenshot): a sandboxed Bash on the Mac denies api.anthropic.com, so every
+    reviewer `claude -p` retried until its 130 s timeout and precheck ran past the Bash tool's 120 s limit (measured in the
+    Mac transcript 74086a14: "deny network-outbound api.anthropic.com:443"). Probe once, honouring the proxy settings, and
+    report unreachable in seconds. Any HTTP status, or a TLS error after a tunnel opened, counts as reachable."""
+    import urllib.request, urllib.error, ssl
+    try:
+        urllib.request.urlopen(urllib.request.Request("https://api.anthropic.com/", method="HEAD"), timeout=timeout)
+        return True, ""
+    except urllib.error.HTTPError:
+        return True, ""
+    except urllib.error.URLError as e:
+        r = getattr(e, "reason", e)
+        if isinstance(r, ssl.SSLError):
+            return True, ""
+        return False, str(r)[:160]
+    except ssl.SSLError:
+        return True, ""
+    except Exception as e:
+        return False, str(e)[:160]
+
+
 def cmd_review(path):
     # 0.3.72: the reviewers run in their own folder, so a relative path is unreadable to them and they returned "COUNT: 0"
     # on a draft with three seeded errors (measured 2026-11-19 12:59 PM PST, exit 0). Always hand them the absolute path.
     path = os.path.abspath(path)
     text = open(path, encoding="utf-8").read()
     tz = tzcheck(text)
+    ok, why = api_reachable()
+    if not ok and os.environ.get("IMC_PANEL_SKIP_PROBE") != "1":
+        print("PANEL FAILED: api.anthropic.com is unreachable from this shell (%s). A sandboxed Bash blocks it; the "
+              "Stop-hook panel runs outside the sandbox. Use an Agent reviewer for the pre-send review." % why); return 2
     r = panel(path)
     if r["status"] != "ok":
         print("PANEL FAILED: no reviewer returned a result"); return 2

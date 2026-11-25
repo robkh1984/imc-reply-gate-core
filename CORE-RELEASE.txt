@@ -1,1 +1,1 @@
-imc-reply-gate core serial 2 (0.4.0): live-update test release, no code change.
+imc-reply-gate core serial 8 (0.4.6): reviewpanel review mode probes api.anthropic.com first and fails in seconds when a sandbox blocks it, so precheck no longer runs past the 120 s Bash limit.
