@@ -1,8 +1,9 @@
 {
  "version": "0.4.0",
- "serial": 1,
+ "serial": 2,
  "files": {
   ".claude-plugin/plugin.json": "a5c1dc506129a3527a51d5dbaf870a6a78bec2e73e2b78e759ee522fde49b69e",
+  "CORE-RELEASE.txt": "3efc58a7b9f1f6ae125ff18000d8b44a3a80e232936db2fbf3b4fab0684c4cff",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
