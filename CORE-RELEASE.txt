@@ -1,1 +1,1 @@
-imc-reply-gate core serial 10 (0.4.8): precheck runs EVERY-REPLY-TABLE as the Stop hook does, and ALL OBJECTIVES DONE is cancelled only by the status word OPEN in capitals.
+imc-reply-gate core serial 11 (0.4.9): replycheck --selftest skips its 15 Mac-home-only cases where ~/Claude/Improving-my-Claude is absent, so a cloud run reports FAILED 0 instead of 13 false failures.

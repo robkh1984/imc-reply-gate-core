@@ -1,9 +1,9 @@
 {
- "version": "0.4.8",
- "serial": 10,
+ "version": "0.4.9",
+ "serial": 11,
  "files": {
-  ".claude-plugin/plugin.json": "814ab0b0c08a1101600b6afc2a3318838a038013350987c52bd2ce59fe9d8516",
-  "CORE-RELEASE.txt": "21224cd09acab4451405178e02934874a4f30aab24050c7debf8f84d995434cd",
+  ".claude-plugin/plugin.json": "c636d72a63232a75b2f42fbe77c174138f710cf0edf2eb1faa3a00f7e88387eb",
+  "CORE-RELEASE.txt": "8a0d4f56ef087d97c364d8e1437aa217a8580a5b4750abbb26d9aae9b91680e1",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -32,7 +32,7 @@
   "checker/pushdeny_selftest.py": "0a4d4ffb26446bf8d90b5940e7099166ed53db7e8418a3521f905f7aaf8081bb",
   "checker/relevance_selftest.py": "6cd094189dd1b6448b6255b22c05a891a183c87cabba2813e5935bd1b3018192",
   "checker/replaycheck.py": "f2e34eb81fd9c86eb0aa6a56dff52d13129cd89755f840e80bc58f3bacad24fd",
-  "checker/replycheck.py": "5d3b8612ee6c7699099fa29ae0da8b5dc86f245c77a25f52ebf96248a53ed364",
+  "checker/replycheck.py": "08e1996491787edc98c348b45f95edf0c11eb08ffdcc1659b10b6c6657a8001d",
   "checker/rulingcovers_selftest.py": "0f8e2146b6c17ce20077f952ff19786fa4d2c2007125f074d801e2e15835776a",
   "checker/rulings-allow.tsv": "879e6829ca2d14024acbfbf15f7b7280487ad7f27abe8a2fa8ba9aa4eab79ebf",
   "checker/runbehind.py": "10c5fd4d5c0e73246ed5a7d9627bdded8cd186767838a077b1f1f8bea51917fd",

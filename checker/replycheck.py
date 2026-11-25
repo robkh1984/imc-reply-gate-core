@@ -6233,7 +6233,18 @@ def _selftest():
     print(("  ok    " if _ok else "  BAD   ") + "R155 CONTROL: RATING-CLOSABLE still fires on a closable rating with no THOROUGH line")
     p, f = (p + 1, f) if _ok else (p, f + 1)
     import os as _os_kc
+    # 0.4.9 (OI-0798, 2026-11-25 2:44 PM PST): these cases read files that exist only in Rob's home folder on his Mac
+    # (~/Claude/Improving-my-Claude, its link registry, ~/.claude/skills). In a cloud container 13 of them failed on
+    # serial 9 and 10 alike, so the selftest could not tell a regression from a missing folder. Without that folder they
+    # print SKIP and count as neither pass nor fail; on the Mac they run as before.
+    _MACHINE_CASES = set(['CONTROL a CAPS concept label with no filename never fires - the spec requires it', 'CONTROL a skill that DOES exist on disk does not fire', 'CONTROL: a concept label naming no script does not fire - 7 of 7 correct rows once did', 'CONTROL: label naming the SAME script as the href does not fire', 'GATE-RATIO stays silent when every recommendation names a real gate', 'LINK-ESCAPES fires on a link into a symlink whose target is in Drive', 'LINK-RESOLVES is silent when the target exists and the row names it', 'LINK-RESOLVES warns when the LABEL names a project script and the href is another', 'SKILL-CLAIM fires on a skill asserted live that has no directory', 'a label whose filename appears only inside its own link target stays silent', 'a registered label named with no link anywhere FIRES', 'naming that same file in the prose of a row still FIRES', 'the link-registry anchor path runs without raising', 'the same filename WITH a link beside it stays silent', 'the same label WITH its link stays silent'])
+    _have_home = _os_kc.path.isdir(_os_kc.path.expanduser("~/Claude/Improving-my-Claude"))
+    _skipped = 0
     for name, text, code, want in cases:
+        if name in _MACHINE_CASES and not _have_home:
+            print("  SKIP  " + name + " (needs ~/Claude/Improving-my-Claude)")
+            _skipped += 1
+            continue
         if code == "STANDING-ROWS":
             _os_kc.environ["REPLYCHECK_KAP_PROJECT"] = "1"  # 0.3.17: the check only runs in the Kaprelian doctors project
         codes = run(text, ALL)
@@ -6707,7 +6718,7 @@ def _selftest():
     print(("  ok    " if ok else "  BAD   ") + "empty input exits 2 and says NOT CHECKED")
     p, f = (p + 1, f) if ok else (p, f + 1)
     f += _wiring_failed
-    print("\n  PASSED %d   FAILED %d" % (p, f))
+    print("\n  PASSED %d   FAILED %d" % (p, f) + ("   SKIPPED %d (machine-only cases)" % _skipped if _skipped else ""))
     return 1 if f else 0
 
 
