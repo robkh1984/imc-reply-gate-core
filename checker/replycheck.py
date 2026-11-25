@@ -665,7 +665,10 @@ _EVERY_TABLE_HDR = re.compile(r"^\s*\|\s*#\s*\|\s*Issue\s*/\s*Risk\s*\|", re.M)
 
 
 _ALL_DONE_RE = re.compile(r"^\s*ALL OBJECTIVES DONE:\s*(\S.{39,})$", re.M)
-_ALL_DONE_BAD = re.compile(r"BLOCKED:|UNTESTED|drops to|NOT READ|thorough:\s*no\b|WAITING-ON-ROB", re.I)
+_ALL_DONE_BAD = re.compile(r"BLOCKED:|UNTESTED|drops to|NOT READ|thorough:\s*no\b|WAITING-ON-ROB|\bunresolved\b", re.I)
+# 0.4.10 (Rob 2026-11-25 2:56 PM PST, "WHY DID YOU STOP???", session 05185df0): a reply that said "Two panel points stay
+# unresolved" about checks Claude could still run closed on ALL OBJECTIVES DONE and the Stop hook allowed it (log
+# 2026-11-25T14:34:27, "fails": []). A reply that names anything unresolved is not all done.
 # 0.4.8: OPEN is the register's status word, so it is matched in capitals only. With re.I the plain words "still open
 # then" and "the last open row" in a reply that closed its last row cancelled ALL OBJECTIVES DONE (measured 2026-11-25
 # 2:17 PM PST, session 05185df0).

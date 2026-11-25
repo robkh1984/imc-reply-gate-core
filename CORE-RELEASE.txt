@@ -1,1 +1,1 @@
-imc-reply-gate core serial 11 (0.4.9): replycheck --selftest skips its 15 Mac-home-only cases where ~/Claude/Improving-my-Claude is absent, so a cloud run reports FAILED 0 instead of 13 false failures.
+imc-reply-gate core serial 12 (0.4.10): a reply that names anything unresolved loses the ALL OBJECTIVES DONE exemption, so it must carry a next-steps table.

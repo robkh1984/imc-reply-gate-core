@@ -13,6 +13,8 @@ t("lowercase open keeps the exemption", rc._all_done_exempt("That was the last o
 t("CONTROL: status word OPEN cancels it", rc._all_done_exempt("OI-0790 stays OPEN.\n" + D + "\n"), False)
 t("CONTROL: BLOCKED: cancels it", rc._all_done_exempt("BLOCKED: x\n" + D + "\n"), False)
 t("CONTROL: no done line, no exemption", rc._all_done_exempt("All good.\n"), False)
+t("0.4.10: a reply naming unresolved points loses the exemption", rc._all_done_exempt("Two panel points stay unresolved.\n" + D + "\n"), False)
+t("0.4.10 CONTROL: a resolved reply keeps it", rc._all_done_exempt("Both checks ran and passed.\n" + D + "\n"), True)
 d = tempfile.mkdtemp(); f = os.path.join(d, "r.md"); open(f, "w").write("The fix is in.\n")
 env = dict(os.environ, IMC_PRECHECK_PANEL="0")
 p = subprocess.run([sys.executable, os.path.join(HERE, "precheck.py"), f], capture_output=True, text=True, env=env)
