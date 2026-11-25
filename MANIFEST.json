@@ -1,9 +1,9 @@
 {
- "version": "0.4.6",
- "serial": 8,
+ "version": "0.4.7",
+ "serial": 9,
  "files": {
-  ".claude-plugin/plugin.json": "d352892b1da2dc01ed4ccb1b61fa9555a209f980effa8a58b2349853db45a47b",
-  "CORE-RELEASE.txt": "8e6bf5560c76e420e01f745db8d8a35f73a9d9d07d386f52468d8dfe38ea079e",
+  ".claude-plugin/plugin.json": "06619cf958b6cf006241856568f919cc3274935fd1ec13d6a550c0a42d63cd8b",
+  "CORE-RELEASE.txt": "a67f8943e463f0273050292d31d5ec6590fe13a871bf10ed246fc58775756e6e",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -25,7 +25,7 @@
   "checker/non-titles.tsv": "cc1297ddaeb12cf131c0e50a94221681fc3b1496debfb5d34b8070f90a387055",
   "checker/overfire_selftest.py": "091cc832d715669ce60030191e0e969ee7cff7add6dccd3e221ce7f9cc42b0df",
   "checker/pipeline_selftest.py": "5238f8317aa911a86d2ba2edacd907f0290010e475b0edbf820cb480ed705144",
-  "checker/precheck.py": "ff6b1d2903c3aafddf0f5d9209fa6da710c221d1b706f7fae5fdc6d427fb0c73",
+  "checker/precheck.py": "85b616340c46c6285637bab5aabed136d71df48140f87597997fa189340d03e5",
   "checker/precheckshim_selftest.py": "8e6bf808b463c83102ba3920804e4bf698987aa3976d13be88e884bfc52eb07c",
   "checker/presendgate_selftest.py": "2ee23683020200870b473200560d19c8b0db138ae4f8e6aabd5bb263534ba587",
   "checker/pushdeny_selftest.py": "0a4d4ffb26446bf8d90b5940e7099166ed53db7e8418a3521f905f7aaf8081bb",
@@ -35,6 +35,7 @@
   "checker/rulingcovers_selftest.py": "0f8e2146b6c17ce20077f952ff19786fa4d2c2007125f074d801e2e15835776a",
   "checker/rulings-allow.tsv": "879e6829ca2d14024acbfbf15f7b7280487ad7f27abe8a2fa8ba9aa4eab79ebf",
   "checker/runbehind.py": "10c5fd4d5c0e73246ed5a7d9627bdded8cd186767838a077b1f1f8bea51917fd",
+  "checker/sandboxfallback_selftest.py": "d3c493a2f72cb2e81a42271f5fe470b3d66c7615312033675c4c9c5510fd68d4",
   "checker/scopecheck.py": "648009bd56d4b9d2fe58eb15de4f9c657aa9cb1f3942ae62736849a41393e59f",
   "checker/sendowned.py": "ab23774bbce075863b91012dec9e7d27fe7a949a9808555155f2ac68a7be2664",
   "checker/sendpath_selftest.py": "31e814b63d1ce0ea2b080df7d5e912b2e23719661bf67d8a6b9339bcf0e02ffe",
@@ -50,10 +51,10 @@
   "hooks/agentguard.py": "85d5af78f0c372a001d3ada6f6965f6a88aaff90ce2784177e1de9b2ce3786ec",
   "hooks/approvalledger.py": "6ab384d2f80cbced14544d6d58056d2f7a350f465f0ece49fe14b01b1926478e",
   "hooks/editlogguard.py": "424ae9c878619ddbd3b64c093d29c9b072e00c02c5abf0f4292d25d093627262",
-  "hooks/gate.py": "a245f3b145c40aa6496cbc6da1fcc3dc80cbbf4d86a69fa96d478b63ad7c7449",
+  "hooks/gate.py": "f6c1f3174fe734c7a1c79c637eeab839f40960cbf6d20d3efb010d60a2c1e06e",
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
   "hooks/intakeguard.py": "45175977a622f0eebfdc6637c4fb86f7c8e971ba7cecbc68ac78bb1a34b1d2dc",
-  "hooks/preaction.py": "53c4992ee60f64d815a10ecbf97f10b51a0f6d9a719e712da514c36f0dbd28e7",
-  "hooks/reviewpanel.py": "f17f64236098dc4e6678876ee3d353ef6894f30e05613637cec9e46761b16c14"
+  "hooks/preaction.py": "620e2c744dbd3d3eeba6f8ce55ef62f3a5c8257015fc5bbb9cebadb62ebd9654",
+  "hooks/reviewpanel.py": "c3ed994e72fc4a6c529ac1ac0346ed699316d481ca3cf4c35d27480910b3de08"
  }
 }

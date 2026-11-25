@@ -93,8 +93,41 @@ def is_write(tool, tinput):
     return not READ_TOOLS.match(tool) and tool.startswith("mcp__") and not re.search(r"__(get|list|read|search|find|fetch|query|lookup)", tool)
 
 
+LAST_WRITTEN = None
+
+
+def _name(session):
+    return re.sub(r"[^A-Za-z0-9_.-]", "_", session or "nosession") + ".json"
+
+
+def _fallback_dirs():
+    """0.4.7 (Rob 2026-11-25, Mac Claude Code): measured at 13:38:52 PST, the stamp command inside the Mac's sandboxed Bash
+    raised "PermissionError: [Errno 1] Operation not permitted: '~/.claude/imc-preaction/6068fe85-....json'", so no stamp
+    could ever be written there and every write in that session was refused. A stamp falls back to a per-user temp folder;
+    the hook, which runs outside the sandbox, reads it there too. Only folders owned by this user count."""
+    import glob as _g
+    if os.environ.get("IMC_PREACTION_DIR"):
+        return []
+    uid = os.getuid() if hasattr(os, "getuid") else -1
+    roots = ["/tmp/claude-%d" % uid, "/private/tmp/claude-%d" % uid]
+    if os.environ.get("TMPDIR"):
+        roots.insert(0, os.environ["TMPDIR"].rstrip("/"))
+    out = []
+    for r in roots:
+        for c in [os.path.join(r, "imc-preaction")] + _g.glob(os.path.join(r, "*", "imc-preaction")) + _g.glob(os.path.join(r, "*", "*", "imc-preaction")):
+            try:
+                if os.path.realpath(c) not in [os.path.realpath(x) for x in out] and (not os.path.exists(c) or os.stat(c).st_uid == uid):
+                    out.append(c)
+            except OSError:
+                pass
+    return out
+
+
 def _path(session):
-    return os.path.join(DIR, re.sub(r"[^A-Za-z0-9_.-]", "_", session or "nosession") + ".json")
+    """The newest existing stamp for this session across the home store and the sandbox fallbacks, else the home path."""
+    cands = [os.path.join(d, _name(session)) for d in [DIR] + _fallback_dirs()]
+    have = [c for c in cands if os.path.isfile(c)]
+    return max(have, key=os.path.getmtime) if have else cands[0]
 
 
 def write_stamp(session, action, objective, cause, minutes=30, now=None, multi=False):
@@ -104,15 +137,24 @@ def write_stamp(session, action, objective, cause, minutes=30, now=None, multi=F
     for k, v in (("action", action), ("objective", objective), ("cause", cause)):
         if not v or len(v.strip()) < 12:
             return "refused: %s is empty or under 12 characters" % k
-    os.makedirs(DIR, exist_ok=True)
     rec = {"action": action.strip(), "objective": objective.strip(), "cause": cause.strip(),
            "stamped": now, "expires": now + 60 * minutes}
     if multi:
         rec["multi"] = True                      # 0.3.61: a declared batch
     rec["sha"] = hashlib.sha256(json.dumps(rec, sort_keys=True).encode()).hexdigest()[:16]
-    with open(_path(session), "w") as f:
-        json.dump(rec, f)
-    return "ok"
+    errs = []
+    for d in [DIR] + _fallback_dirs():
+        try:
+            os.makedirs(d, exist_ok=True)
+            with open(os.path.join(d, _name(session)), "w") as f:
+                json.dump(rec, f)
+            # an older stamp elsewhere cannot shadow this one: _path() picks the newest file
+            global LAST_WRITTEN
+            LAST_WRITTEN = os.path.join(d, _name(session))
+            return "ok"
+        except OSError as e:
+            errs.append("%s: %s" % (d, type(e).__name__))
+    return "refused: the stamp could not be written anywhere (%s)" % "; ".join(errs)
 
 
 def check_stamp(session, now=None):
@@ -329,5 +371,8 @@ if __name__ == "__main__":
         p.add_argument("--minutes", type=int, default=30); p.add_argument("--session", default=os.environ.get("CLAUDE_SESSION_ID", ""))
         p.add_argument("--multi", action="store_true")  # 0.3.61
         n, _extra = p.parse_known_args(a)   # 0.3.11: a stray trailing '.' copied from the old message must not break the stamp
-        r = write_stamp(n.session, n.action, n.objective, n.cause, n.minutes, multi=getattr(n, "multi", False)); print(r); sys.exit(0 if r == "ok" else 1)
+        r = write_stamp(n.session, n.action, n.objective, n.cause, n.minutes, multi=getattr(n, "multi", False)); print(r)
+        if r == "ok" and LAST_WRITTEN and not LAST_WRITTEN.startswith(DIR + os.sep):
+            print("stamp written to the sandbox fallback " + LAST_WRITTEN, file=sys.stderr)
+        sys.exit(0 if r == "ok" else 1)
     print(__doc__); sys.exit(1)

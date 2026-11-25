@@ -1,1 +1,1 @@
-imc-reply-gate core serial 8 (0.4.6): reviewpanel review mode probes api.anthropic.com first and fails in seconds when a sandbox blocks it, so precheck no longer runs past the 120 s Bash limit.
+imc-reply-gate core serial 9 (0.4.7): inside a sandboxed Bash, the pre-action stamp and the precheck stamp fall back to a per-user temp folder that the hooks also read, so sandboxed Mac sessions are no longer refused on every write.

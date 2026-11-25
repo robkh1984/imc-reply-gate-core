@@ -95,6 +95,43 @@ TABLE_SCOPED = ("ONE-DECISION", "REVIEW-LINK", "OPEN-ROW-LINK", "TABLE-SHAPE", "
                 "EXCEPTION-REJECTED", "RANK-DEPENDENCY", "RANK-STRUCT", "PREVENTS", "STANDING-ROWS", "TEST-FIELD", "GATE-RATIO", "TABLE-RESEND", "SELFCHECK", "ROOTCAUSE")
 RATING_IN_ROW = re.compile(r"\b\d{1,2}\s*/\s*10\b|\bconfidence\b", re.I)
 PRECHECKED = os.path.expanduser("~/.claude/imc-reply-gate-prechecked.tsv")
+
+
+def sandbox_fallbacks(name):
+    """0.4.7 (Rob 2026-11-25, Mac Claude Code): a sandboxed Bash on the Mac cannot write under ~/.claude (measured: the
+    stamp command raised "PermissionError: [Errno 1] Operation not permitted: '~/.claude/imc-preaction/6068fe85-....json'"
+    at 13:38:52 PST), so precheck and the pre-action stamp could not record anything and every write was refused. Writers
+    that run inside the sandbox fall back to these paths; the hooks, which run outside it, read them too. Only folders
+    owned by this user count, so another account cannot plant a stamp."""
+    import glob as _g
+    uid = os.getuid() if hasattr(os, "getuid") else -1
+    roots = ["/tmp/claude-%d" % uid, "/private/tmp/claude-%d" % uid]
+    if os.environ.get("TMPDIR"):
+        roots.insert(0, os.environ["TMPDIR"].rstrip("/"))
+    out = []
+    for r in roots:
+        for c in [os.path.join(r, name)] + _g.glob(os.path.join(r, "*", name)) + _g.glob(os.path.join(r, "*", "*", name)):
+            try:
+                if os.path.realpath(c) not in [os.path.realpath(x) for x in out] and \
+                        (not os.path.exists(c) or os.stat(c).st_uid == uid):
+                    out.append(c)
+            except OSError:
+                pass
+    return out
+
+
+def prechecked_files():
+    return [PRECHECKED] + [c for c in sandbox_fallbacks("imc-reply-gate-prechecked.tsv") if os.path.isfile(c)]
+
+
+def prechecked_lines():
+    for fp in prechecked_files():
+        try:
+            with open(fp, encoding="utf-8", errors="replace") as f:
+                for ln in f:
+                    yield ln
+        except OSError:
+            continue
 MAX_BLOCKS = 2
 PUSH_MAX = 1000  # 0.3.67: a table-less PushNotification up to this many characters is an alert, not a reply
 PROGRESS_MAX = 400  # 0.3.3: a table-less SendUserMessage up to this many characters is a progress line
@@ -778,11 +815,7 @@ def norm_sha(text):
 
 
 def prechecked(sha):
-    try:
-        with open(PRECHECKED, encoding="utf-8", errors="replace") as f:
-            return any(ln.split("\t", 1)[0].strip() == sha for ln in f)
-    except FileNotFoundError:
-        return False
+    return any(ln.split("\t", 1)[0].strip() == sha for ln in prechecked_lines())
 
 
 def first_diff_hint(text):
@@ -791,8 +824,7 @@ def first_diff_hint(text):
     code points so a look-alike character is visible."""
     try:
         sent = normalize(text)
-        with open(PRECHECKED, encoding="utf-8", errors="replace") as f:
-            rows = [ln.rstrip("\n").split("\t") for ln in f if ln.strip()]
+        rows = [ln.rstrip("\n").split("\t") for ln in prechecked_lines() if ln.strip()]
         best = None
         for row in rows[-8:]:
             if len(row) < 3 or not os.path.isfile(row[2]):

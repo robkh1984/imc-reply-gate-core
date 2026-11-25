@@ -222,7 +222,8 @@ def cmd_stop():
         _sp = _iu.spec_from_file_location("imc_gate", os.path.join(os.path.dirname(os.path.abspath(__file__)), "gate.py"))
         _g = _iu.module_from_spec(_sp); _sp.loader.exec_module(_g)
         _sha = _g.norm_sha(text)
-        with open(os.path.expanduser("~/.claude/imc-reply-gate-prechecked.tsv"), encoding="utf-8", errors="replace") as _f:
+        _lines = list(_g.prechecked_lines()) if hasattr(_g, "prechecked_lines") else open(os.path.expanduser("~/.claude/imc-reply-gate-prechecked.tsv"), encoding="utf-8", errors="replace").readlines()
+        for _f in (_lines,):
             # 0.3.73: a stamp counts when the panel ran on the draft, or when the reply carries a table: a table reply cannot be
             # stamped without an Agent reviewer's record (PRE-SEND-REVIEW), so a session whose panel cannot sign in is not
             # blocked again after an Agent review. A stamped table-less reply whose panel did not run is still reviewed here.

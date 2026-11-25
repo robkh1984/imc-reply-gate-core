@@ -251,12 +251,21 @@ def main(argv):
             pass
         return 1
     sha = gate.norm_sha(text)
-    os.makedirs(os.path.dirname(STAMPS), exist_ok=True)
     ts = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
-    with open(STAMPS, "a", encoding="utf-8") as f:
-        f.write("%s\t%s\t%s%s\n" % (sha, ts, draft, "\tpanel=ran" if _panel_ran else ""))
-    print("PRECHECK PASS  stamp %s written to %s" % (sha[:16], STAMPS))
-    return 0
+    row = "%s\t%s\t%s%s\n" % (sha, ts, draft, "\tpanel=ran" if _panel_ran else "")
+    # 0.4.7: a sandboxed Bash cannot write under ~/.claude; fall back to a per-user temp path the gate hooks also read.
+    _errs = []
+    for _dst in [STAMPS] + (gate.sandbox_fallbacks("imc-reply-gate-prechecked.tsv") if hasattr(gate, "sandbox_fallbacks") else []):
+        try:
+            os.makedirs(os.path.dirname(_dst), exist_ok=True)
+            with open(_dst, "a", encoding="utf-8") as f:
+                f.write(row)
+            print("PRECHECK PASS  stamp %s written to %s" % (sha[:16], _dst))
+            return 0
+        except OSError as _e:
+            _errs.append("%s: %s" % (_dst, type(_e).__name__))
+    print("PRECHECK FAILED  the stamp could not be written anywhere: " + "; ".join(_errs))
+    return 1
 
 
 if __name__ == "__main__":
