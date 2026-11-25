@@ -1,1 +1,1 @@
-imc-reply-gate core serial 9 (0.4.7): inside a sandboxed Bash, the pre-action stamp and the precheck stamp fall back to a per-user temp folder that the hooks also read, so sandboxed Mac sessions are no longer refused on every write.
+imc-reply-gate core serial 10 (0.4.8): precheck runs EVERY-REPLY-TABLE as the Stop hook does, and ALL OBJECTIVES DONE is cancelled only by the status word OPEN in capitals.

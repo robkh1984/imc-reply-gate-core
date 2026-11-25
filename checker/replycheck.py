@@ -665,7 +665,11 @@ _EVERY_TABLE_HDR = re.compile(r"^\s*\|\s*#\s*\|\s*Issue\s*/\s*Risk\s*\|", re.M)
 
 
 _ALL_DONE_RE = re.compile(r"^\s*ALL OBJECTIVES DONE:\s*(\S.{39,})$", re.M)
-_ALL_DONE_BAD = re.compile(r"BLOCKED:|UNTESTED|drops to|NOT READ|thorough:\s*no\b|\bOPEN\b|WAITING-ON-ROB", re.I)
+_ALL_DONE_BAD = re.compile(r"BLOCKED:|UNTESTED|drops to|NOT READ|thorough:\s*no\b|WAITING-ON-ROB", re.I)
+# 0.4.8: OPEN is the register's status word, so it is matched in capitals only. With re.I the plain words "still open
+# then" and "the last open row" in a reply that closed its last row cancelled ALL OBJECTIVES DONE (measured 2026-11-25
+# 2:17 PM PST, session 05185df0).
+_ALL_DONE_OPEN = re.compile(r"\bOPEN\b")
 
 
 def _all_done_exempt(text):
@@ -673,7 +677,7 @@ def _all_done_exempt(text):
     decision of the session is measured, tested and verified and every objective is DONE. Mechanical form: a line
     'ALL OBJECTIVES DONE: <at least 40 characters naming the call and result>' and no BLOCKED:, UNTESTED, drops to,
     NOT READ, thorough: no, OPEN or WAITING-ON-ROB anywhere in the reply. The gate cannot prove the claim true."""
-    return bool(_ALL_DONE_RE.search(text)) and not _ALL_DONE_BAD.search(text)
+    return bool(_ALL_DONE_RE.search(text)) and not _ALL_DONE_BAD.search(text) and not _ALL_DONE_OPEN.search(text)
 
 
 def check_every_reply_table(text):

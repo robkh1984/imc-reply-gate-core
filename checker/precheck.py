@@ -114,6 +114,16 @@ def main(argv):
         env.pop("REPLYCHECK_PROJECT", None)
     else:
         env["REPLYCHECK_PROJECT"] = "1"
+    # 0.4.8 (Rob 2026-11-25 2:17 PM PST, session 05185df0): precheck stamped a reply that the Stop hook then blocked on
+    # EVERY-REPLY-TABLE, because the gate sets REPLYCHECK_EVERY_TABLE=1 for chat replies and precheck never did, so the
+    # blocked text reached Rob's screen. Precheck now runs the same check, with the gate's own task REPLY FORM waiver.
+    if os.environ.get("IMC_EVERY_REPLY_TABLE") != "0":
+        try:
+            _tf = bool(_tr0) and gate.task_form_no_table(gate.read_entries(_tr0))
+        except Exception:
+            _tf = False
+        if not _tf:
+            env["REPLYCHECK_EVERY_TABLE"] = "1"
     p = subprocess.run([sys.executable, CHECKER, draft], capture_output=True, text=True, env=env, cwd=HERE)
     sys.stderr.write(p.stderr)
     if p.returncode not in (0, 1) or "Traceback" in p.stderr:
