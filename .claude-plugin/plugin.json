@@ -1,5 +1,5 @@
 {
   "name": "imc-reply-gate",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Reply gate core for Improving my Claude (Overall), loaded at run time by the imc-reply-gate loader plug-in from robkh1984/imc-reply-gate-core."
 }

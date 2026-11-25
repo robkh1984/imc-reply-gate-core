@@ -739,6 +739,29 @@ def check_done_claim(text):
              % (len(bad), " | ".join(b[:120] for b in bad[:3])))
 
 
+
+# ---------- CLOSED-ON-INFERRED-CAUSE, core serial 6 (OI-0789, measured 2026-11-25 session 05185df0) ----------
+# MEASURED CAUSE: the reply that closed OI-0733 carried "ROOT CAUSE: inferred, not proven - ..." beside "OI-0733 (...) is now
+# closed" and a CHECKED line "CLOSED OI-0733 as DONE", and precheck stamped it (stamp a7b37d9554adf57f). Rob's EVIDENCE paragraph
+# requires the root cause found and fixed first, so a close beside an inferred cause is a premature close. NARROW: fires only
+# when a ROOT CAUSE line opens with "inferred" and the reply claims a register row closed or DONE. Not caught: a line that is
+# measured for one row and inferred for another; quoted text is not read.
+_RC_INFERRED = re.compile(r"^\s*ROOT CAUSE:\s*inferred\b", re.I | re.M)
+_ROW_CLOSED = re.compile(r"\bCLOSED\s+OI-\d{3,5}\s+as\s+DONE\b|\bOI-\d{3,5}\b[^.\n|]{0,160}?\b(?:is\s+(?:now\s+)?closed|was\s+closed|closed\s+as\s+DONE)\b", re.I)
+
+
+def check_closed_inferred(text):
+    if not _RC_INFERRED.search(text):
+        return
+    body = re.sub(r"```.*?```", " ", text, flags=re.S)
+    body = re.sub(r"\"[^\"\n]{0,400}\"", lambda m: m.group(0) if "CLOSED OI-" in m.group(0) else " ", body)
+    m = _ROW_CLOSED.search(body)
+    if m:
+        fail("CLOSED-ON-INFERRED-CAUSE", "the ROOT CAUSE line says inferred, yet the reply closes a register row ('%s'). "
+             "Rob's EVIDENCE rule: find the root cause and fix it before closing. Measure the cause first, or keep the row open "
+             "and say what measuring it needs (OI-0789)." % m.group(0)[:120])
+
+
 # ---------- ENDS-ON-INTENT, 0.3.39 (Rob 2026-11-05 12:15 AM PST "WHY DID YOU STOP???") ----------
 # MEASURED CAUSE: in the 48-hour trace of 30 complaint messages, 5 replies before them ended on a wait or a promise ("I'm waiting
 # for C", "I'll run the large job next", "next I rerun gatescan") with no tool call after it, and at 12:15 AM PST this session ended
@@ -7086,6 +7109,7 @@ def main():
     check_opener(text)
     check_every_reply_table(text)
     check_done_claim(text)            # DONE-NO-CALL, Rob 2026-11-04 (0.3.37)
+    check_closed_inferred(text)       # CLOSED-ON-INFERRED-CAUSE, core serial 6 (OI-0789)
     check_ends_on_intent(text)        # ENDS-ON-INTENT, Rob 2026-11-05 (0.3.39)
     check_nothing_left(text)          # NOTHING-LEFT-CLAIM, Rob 2026-11-11 (0.3.47, R26)
     check_untested_rec(text)          # REC-NOT-TESTED, Rob 2026-11-05 (0.3.41)

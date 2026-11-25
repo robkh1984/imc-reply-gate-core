@@ -1,8 +1,8 @@
 {
- "version": "0.4.3",
- "serial": 5,
+ "version": "0.4.4",
+ "serial": 6,
  "files": {
-  ".claude-plugin/plugin.json": "d2691e22f907bb02cefc341f3ff525acb909d8285a37b64f7660256b797e94b8",
+  ".claude-plugin/plugin.json": "7cb327c5c8385135174b40037fd78758dc4449451ad1b5112bfc63281b07d692",
   "CORE-RELEASE.txt": "3efc58a7b9f1f6ae125ff18000d8b44a3a80e232936db2fbf3b4fab0684c4cff",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
@@ -29,7 +29,7 @@
   "checker/pushdeny_selftest.py": "0a4d4ffb26446bf8d90b5940e7099166ed53db7e8418a3521f905f7aaf8081bb",
   "checker/relevance_selftest.py": "6cd094189dd1b6448b6255b22c05a891a183c87cabba2813e5935bd1b3018192",
   "checker/replaycheck.py": "f2e34eb81fd9c86eb0aa6a56dff52d13129cd89755f840e80bc58f3bacad24fd",
-  "checker/replycheck.py": "cff322e9e4d7f1d3a25a539889976fa46ba029efe02a49f30ece1fb2d687e017",
+  "checker/replycheck.py": "5b69d41a001204839848e0521cd4bbaf25b24942ea1a4ecdca693491d3b072c3",
   "checker/rulingcovers_selftest.py": "0f8e2146b6c17ce20077f952ff19786fa4d2c2007125f074d801e2e15835776a",
   "checker/rulings-allow.tsv": "879e6829ca2d14024acbfbf15f7b7280487ad7f27abe8a2fa8ba9aa4eab79ebf",
   "checker/runbehind.py": "10c5fd4d5c0e73246ed5a7d9627bdded8cd186767838a077b1f1f8bea51917fd",
@@ -52,6 +52,7 @@
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
   "hooks/intakeguard.py": "45175977a622f0eebfdc6637c4fb86f7c8e971ba7cecbc68ac78bb1a34b1d2dc",
   "hooks/preaction.py": "53c4992ee60f64d815a10ecbf97f10b51a0f6d9a719e712da514c36f0dbd28e7",
-  "hooks/reviewpanel.py": "374ecdfbeec9f2f745d04dba32c9f1064f56a28c72166dba5228c320ab2209cb"
+  "hooks/reviewpanel.py": "374ecdfbeec9f2f745d04dba32c9f1064f56a28c72166dba5228c320ab2209cb",
+  "checker/closedinferred_selftest.py": "bd9373d70280794c3c5359cecd3aace68c63442b785c488e539d6d269bbb9e8b"
  }
 }
