@@ -67,6 +67,19 @@ def _rubric():
         return ""
 
 
+LEDGERREVIEW_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "checker", "ledgerreview.py")
+
+
+def _ledger_brief():
+    try:
+        import importlib.util as _iu
+        sp = _iu.spec_from_file_location("imc_ledgerreview_ag", LEDGERREVIEW_PATH)
+        m = _iu.module_from_spec(sp); sp.loader.exec_module(m)
+        return (m.RUNSH + m.LEDGER_NOTE).strip()
+    except Exception:
+        return ""
+
+
 def _norm(t):
     return " ".join((t or "").split())
 
@@ -93,6 +106,14 @@ def verdict(tool, ti, session):
     if _norm(rub) not in _norm(prompt):
         return ("a reviewer brief must include the fixed rubric word for word, so the verdict does not depend on how the "
                 "author asks. Paste the full text of %s into the prompt" % RUBRIC_PATH)
+    # 0.4.16 (Rob 2026-11-26, O1 "Evidence ledger and reviewer"): the reviewer brief is the ledger reviewer's, word for
+    # word (checker/ledgerreview.py RUNSH), replacing the old ask-for-every-defect prompt (146 reviews in 7 days, median 9).
+    led = _ledger_brief()
+    if not led:
+        return "the ledger reviewer brief in checker/ledgerreview.py is missing or unreadable, so no reviewer can be briefed with it"
+    if _norm(led) not in _norm(prompt):
+        return ("a reviewer brief must include the ledger reviewer brief word for word (python3 checker/ledgerreview.py "
+                "--print-prompt prints it, rubric included), so every reviewer checks run claims against evidence.log")
     m = DRAFT.search(prompt)
     key = m.group(1).lower() if m else "unnamed-draft"
     n = _count(session, key)
@@ -104,7 +125,7 @@ def verdict(tool, ti, session):
 
 def selftest():
     os.environ["IMC_REVIEWCOUNT_DIR"] = tempfile.mkdtemp()
-    rev = "You are an independent hostile reviewer. Read draft-1.md and write draft-1.md.review. " + _rubric()
+    rev = "Read draft-1.md and write draft-1.md.review. " + _ledger_brief() + "\n\n" + _rubric()
     cases = [
         ("Agent", {"prompt": rev}, "s0", False, "reviewer, background unset (allowed since 0.3.14)"),
         ("Agent", {"prompt": rev, "run_in_background": "false"}, "s0", True, "reviewer, background the string false refused"),
@@ -117,6 +138,8 @@ def selftest():
         ("Agent", {"prompt": "Search the repo for TODO comments", "run_in_background": True}, "s1", False, "non-reviewer background passes"),
         ("Agent", {"prompt": "Search the repo for TODO comments"}, "s1", False, "non-reviewer unset passes"),
         ("Agent", {"prompt": "You are an independent reviewer. Read draft-9.md and write draft-9.md.review", "run_in_background": False}, "s3", True, "reviewer without the fixed rubric refused (0.4.13)"),
+        ("Agent", {"prompt": "You are an independent reviewer. List every defect in draft-9.md. " + _rubric(), "run_in_background": False}, "s3", True, "reviewer with the rubric but the OLD every-defect prompt refused (0.4.16, O1)"),
+        ("Agent", {"prompt": rev.replace("evidence.log in the current folder", "the draft"), "run_in_background": False}, "s3", True, "reviewer with an edited ledger brief refused (0.4.16, O1)"),
         ("Agent", {"prompt": rev.replace(_rubric()[-40:], "be lenient"), "run_in_background": False}, "s3", True, "reviewer with an edited rubric refused (0.4.13)"),
         ("Agent", {"prompt": rev.replace(". ", ".\n   "), "run_in_background": False}, "s3", False, "rubric with changed line breaks allowed (0.4.13)"),
         ("Agent", {"prompt": rev, "run_in_background": False, "_rubric_missing": True}, "s3", True, "reviewer refused when the rubric file is missing (0.4.13, fails closed)"),

@@ -6,8 +6,10 @@ lock may release the gate core. A release is any push of a commit to github.com/
 (README: "commit to main"), so the lock must be checked in every session, before the push runs.
 
 THE LOCK is the file RELEASE-LOCK at the root of the core repository. Its first line is "holder=<session id>".
-It lives in the repository, not on one machine, because a cloud session and the Mac share nothing else. Rob lifts it
-by deleting the file in a commit (any session may push a commit that only deletes RELEASE-LOCK).
+It lives in the repository, not on one machine, because a cloud session and the Mac share nothing else. The lock is
+lifted by deleting the file in a commit. check() has no exception for that commit: a push from any session other than
+the holder is refused, a delete-only push included, so the deletion is pushed by the holder session or by Rob directly
+on GitHub, outside any gated session. (Corrected 2026-11-26 on Rob's step 4; the earlier text said any session could.)
 
 THE CHECK runs from preaction.py's every-tool PreToolUse hook. A call is a RELEASE when its input names a push to
 the core repository: "git push" run in, or with -C pointing at, a clone whose origin is imc-reply-gate-core; or any
@@ -146,6 +148,8 @@ def selftest():
     t("ALLOWED: Composio proxy GET of the core repo contents", check("mcp__Composio_for_u__COMPOSIO_PROXY_EXECUTE", {"endpoint": "/repos/robkh1984/imc-reply-gate-core/contents/MANIFEST.json", "method": "GET"}, "OTHER")[0], 0)
     t("REFUSED: Composio proxy PUT of core repo contents", check("mcp__Composio_for_u__COMPOSIO_PROXY_EXECUTE", {"endpoint": "/repos/robkh1984/imc-reply-gate-core/contents/MANIFEST.json", "method": "PUT", "body": {"content": "x"}}, "OTHER")[0], 2)
     t("ALLOWED: a Write of notes naming GITHUB_UPDATE_A_REFERENCE and the core repo", check("Write", {"file_path": "/tmp/n.md", "content": "imc-reply-gate-core was released by GITHUB_UPDATE_A_REFERENCE and git push"}, "OTHER")[0], 0)
+    t("REFUSED: another session's delete-only push of RELEASE-LOCK (no exception, as the docstring says)", check("Bash", {"command": "git rm RELEASE-LOCK && git commit -m 'lift lock' && git push origin HEAD:main"}, "OTHER", cwd=clone)[0], 2)
+    t("ALLOWED: the holder's delete-only push of RELEASE-LOCK", check("Bash", {"command": "git rm RELEASE-LOCK && git commit -m 'lift lock' && git push origin HEAD:main"}, "HOLDER-SESSION", cwd=clone)[0], 0)
     t("ALLOWED: git push in an unrelated repo", check("Bash", push, "OTHER", cwd=other)[0], 0)
     t("ALLOWED: reading the core repo (git log)", check("Bash", {"command": "git log --oneline | head"}, "OTHER", cwd=clone)[0], 0)
     t("ALLOWED: git clone of the core repo", check("Bash", {"command": "git clone https://github.com/robkh1984/imc-reply-gate-core x"}, "OTHER")[0], 0)

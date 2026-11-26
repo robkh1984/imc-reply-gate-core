@@ -9,7 +9,7 @@ Panel set (Rob 2026-10-23 4:55 PM PDT): 1 default + 2 haiku + 1 opus, run in par
 """
 import datetime, glob, hashlib, json, os, re, subprocess, sys, tempfile, time, concurrent.futures as cf
 
-PANEL = [("default", None), ("haiku-1", "haiku"), ("haiku-2", "haiku"), ("opus", "opus")]
+PANEL = [("ledger-sonnet", "sonnet")]  # 0.4.16 (O1): one ledger reviewer; was 1 default + 2 haiku + 1 opus
 MAX_ROUNDS = 1  # 0.4.11 (Rob 2026-11-25 "now", OI-0802 under OI-0755): one panel round per draft; 5 rounds of 13 to 18 findings never converged
 HOOK_BUDGET_S = 140
 CLEAN_ENV_DROP = ("CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_REMOTE_SESSION_ID", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_AFTER_LAST_COMPACT")
@@ -82,23 +82,38 @@ def tzcheck(text, default_year=None):
     return bad
 
 
-def panel(path):
+def find_evidence(session=None):
+    """0.4.16 (O1): the session's evidence.log written by hooks/ledger.py, or None."""
+    import importlib.util as _iu
+    _sp = _iu.spec_from_file_location("imc_ledger", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ledger.py"))
+    lg = _iu.module_from_spec(_sp); _sp.loader.exec_module(lg)
+    sid = session or os.environ.get("CLAUDE_CODE_SESSION_ID") or os.environ.get("CLAUDE_SESSION_ID") or ""
+    p = lg.path(sid) if sid else ""
+    return p if p and os.path.isfile(p) else None
+
+
+def panel(path, session=None):
+    """0.4.16 (Rob 2026-11-26, O1 "Evidence ledger and reviewer"): ONE ledger reviewer replaces the 4-model panel and its
+    REVIEW_PROMPT. Measured 2026-11-26: the panel prompt asks for every defect and never came back clean (146 reviews in
+    7 days, median 9 findings); the ledger reviewer caught 10 of 10 planted errors with 0 unfair flags on both the Mac and
+    the cloud (checker/fixtures_o1). It checks run claims against the session's evidence.log; no ledger, no review."""
+    import importlib.util as _iu
     t0 = time.time()
-    with cf.ThreadPoolExecutor(len(PANEL)) as ex:
-        outs = list(ex.map(lambda p: (p[0], isolated(REVIEW_PROMPT.format(f=path), p[1])), PANEL))
-    ok = [(n, o) for n, o in outs if o["result"] and not o["error"]]
-    cost = sum(o["cost"] for _, o in outs)
-    if not ok:
-        return {"status": "failed", "findings": "", "cost": cost, "secs": time.time() - t0, "outs": outs}
-    joined = "\n\n".join("== reviewer %s ==\n%s" % (n, o["result"]) for n, o in ok)
-    m = isolated(MERGE_PROMPT.format(x=joined), None, tools=False, turns=3, timeout=max(20, HOOK_BUDGET_S - (time.time() - t0) - 5))
-    cost += m["cost"]
-    merged = m["result"] if (m["result"] and not m["error"]) else joined  # 0.3.72: a failed merge falls back to the raw findings
-    return {"status": "ok", "findings": merged, "cost": cost, "secs": time.time() - t0, "outs": outs, "reviewers_ok": len(ok)}
+    ev = find_evidence(session)
+    if not ev:
+        o = {"result": "", "error": "no evidence.log for this session (the PostToolUse ledger hook has not written one)", "cost": 0.0, "secs": 0.0}
+        return {"status": "failed", "findings": "", "cost": 0.0, "secs": 0.0, "outs": [("ledger", o)]}
+    _sp = _iu.spec_from_file_location("imc_ledgerreview", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "checker", "ledgerreview.py"))
+    lr = _iu.module_from_spec(_sp); _sp.loader.exec_module(lr)
+    r = lr.review(path, ev, model="sonnet", turns=30, timeout=max(30, HOOK_BUDGET_S - 10))
+    o = {"result": r.get("result", ""), "error": r.get("why") if r.get("failed") else None, "cost": r.get("cost", 0.0) or 0.0, "secs": r.get("secs", 0.0)}
+    if r.get("failed"):
+        return {"status": "failed", "findings": "", "cost": o["cost"], "secs": time.time() - t0, "outs": [("ledger-sonnet", o)]}
+    return {"status": "ok", "findings": o["result"], "cost": o["cost"], "secs": time.time() - t0, "outs": [("ledger-sonnet", o)], "reviewers_ok": 1}
 
 
 def count_of(findings):
-    m = re.search(r"COUNT:\s*(\d+)", findings)
+    m = re.search(r"FINDINGS:\s*(\d+)", findings) or re.search(r"COUNT:\s*(\d+)", findings)
     return int(m.group(1)) if m else len(re.findall(r"^\s*\d+[.)]\s", findings, re.M))
 
 
@@ -251,7 +266,7 @@ def cmd_stop():
     d = tempfile.mkdtemp(prefix="reviewpanel-")
     f = os.path.join(d, "reply.md"); open(f, "w").write(text)
     tz = tzcheck(text)
-    r = panel(f)
+    r = panel(f, hin.get("session_id"))
     st[key] = rounds + 1
     try: json.dump(st, open(STATE, "w"))
     except Exception: pass
@@ -267,7 +282,7 @@ def cmd_stop():
         findings, n = r["findings"], count_of(r["findings"])
     if tz: findings = "\n".join("TZCHECK: " + b for b in tz) + "\n" + findings
     if n + len(tz) == 0: return 0
-    reason = ("The reviewer panel (1 default, 2 small, 1 large model, isolated) found defects in your last reply. Fix each one that is real, "
+    reason = ("The ledger reviewer (one isolated sonnet run checking claims against evidence.log) found defects in your last reply. Fix each one that is real, "
               "then resend; dispute with a reason any that are not. Round %d of %d.\n%s\nPrecheck in THIS session: python3 \"%s\" <draft>" % (rounds + 1, MAX_ROUNDS, findings.strip(), PRECHECK_PATH))
     print(json.dumps({"decision": "block", "reason": reason}))
     return 0
@@ -280,20 +295,30 @@ def selftest():
     for s, want in cases:
         got = len(tzcheck(s, 2026))
         if got != want: fails.append("tzcheck %r: got %d want %d" % (s, got, want))
-    # 2 panel flags seeded errors, isolation, time, cost
+    # 2 (0.4.16, O1) the ledger reviewer on the held-out fixtures: D05 carries 2 planted errors, D03 none; the ledger's line 9 is forged
+    fx = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "checker", "fixtures_o1")
+    evd = tempfile.mkdtemp(prefix="reviewpanel-ev-")
+    os.environ["IMC_EVIDENCE_DIR"] = evd
+    os.environ["CLAUDE_CODE_SESSION_ID"] = "selftest-ledger"
+    os.makedirs(os.path.join(evd, "selftest-ledger"))
+    import shutil as _sh
+    _sh.copy(os.path.join(fx, "evidence.log"), os.path.join(evd, "selftest-ledger", "evidence.log"))
+    _sh.copy(os.path.join(fx, "ledger-key.txt"), os.path.join(evd, "selftest-ledger", ".key"))
     d = tempfile.mkdtemp(prefix="reviewpanel-self-")
     f = os.path.join(d, "reply.md")
-    open(f, "w").write("The scheduled task has 12 items: 5 done and 4 open, so 9 of 12 are handled. The report was reviewed by 3 reviewers (a, b, c) and all 4 agreed. "
-                       "The caching change reduced latency from 200 ms to 150 ms, a 50 percent cut. The next run is Nov 9 at 9:00 AM PDT.\n")
+    _sh.copy(os.path.join(fx, "D05.md"), f)
     t = time.time(); r = panel(f); secs = time.time() - t
-    if r["status"] != "ok": fails.append("panel failed")
+    if r["status"] != "ok": fails.append("ledger reviewer failed on D05: %s" % r["outs"][0][1].get("error"))
     else:
         txt = r["findings"].lower()
-        for label, pat in (("5+4 is not 12", r"(5.*4.*12|9 of 12|12 items)"), ("3 reviewers vs 4 agreed", r"(3 reviewers|all 4|four)"), ("200 to 150 is 25 percent", r"(25 ?(%|percent)|50 ?(%|percent))")):
-            if not re.search(pat, txt): fails.append("panel missed seeded error: " + label)
-        for n, o in r["outs"]:
-            if "CORRECTION:" in o["result"]: fails.append("reviewer %s answered in gate format (not isolated)" % n)
-    if secs > HOOK_BUDGET_S - 5: fails.append("panel took %.0f s, over the hook budget" % secs)
+        # The wrong-number error was caught in 7 of 7 measured runs, the overstated-proof one in 5 of 7 (2026-11-26), so only the
+        # first is asserted here: this selftest checks the wiring; recall is measured on the full fixture set, not here.
+        if count_of(r["findings"]) < 1: fails.append("ledger reviewer found nothing on D05, which carries 2 planted errors")
+        if not re.search(r"returned 13", txt): fails.append("ledger reviewer missed planted error: SWITCHED 13 vs 11")
+    fc = os.path.join(d, "clean.md"); _sh.copy(os.path.join(fx, "D03.md"), fc)
+    rc = panel(fc)
+    if rc["status"] != "ok" or count_of(rc["findings"]) != 0: fails.append("ledger reviewer flagged the correct draft D03: %s" % (rc.get("findings") or "")[:200])
+    if secs > HOOK_BUDGET_S - 5: fails.append("ledger reviewer took %.0f s, over the hook budget" % secs)
     if not tzcheck("Nov 9 at 9:00 AM PDT", 2026): fails.append("tz control")
     # 3 (0.3.72) fail-closed control: a reviewer that returns an auth error with subtype success and $0 must make the panel FAIL
     fd = tempfile.mkdtemp(prefix="reviewpanel-fake-")
@@ -308,7 +333,7 @@ def selftest():
         if cmd_review(f) != 2: fails.append("review mode did not exit 2 when no reviewer ran")
         # 4 (0.3.73) a real, billed review that quotes "Authentication error" must still count as a review
         open(fk, "w").write("#!/usr/bin/env python3\nimport json\nprint(json.dumps({'type': 'result', 'subtype': 'success', 'is_error': False, "
-                            "'result': '1. \"Authentication error\" is quoted without a source.\\nCOUNT: 1', 'total_cost_usd': 0.07}))\n")
+                            "'result': 'FINDINGS: 1\\n1. \"Authentication error\" is quoted without a source.', 'total_cost_usd': 0.07}))\n")
         rq = panel(f)
         if rq["status"] != "ok": fails.append("a billed review quoting 'Authentication error' was counted as a failed reviewer")
     finally:
