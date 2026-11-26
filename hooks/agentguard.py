@@ -57,6 +57,20 @@ def _count(session, key):
     return data[key]
 
 
+RUBRIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reviewer-rubric.txt")
+
+
+def _rubric():
+    try:
+        return open(RUBRIC_PATH, encoding="utf-8").read().strip()
+    except Exception:
+        return ""
+
+
+def _norm(t):
+    return " ".join((t or "").split())
+
+
 def verdict(tool, ti, session):
     """None to allow, or the refusal reason."""
     if tool == "Monitor":
@@ -70,6 +84,15 @@ def verdict(tool, ti, session):
         return ("a reviewer Agent call must not set run_in_background to anything but false (0.3.14: leaving it unset is allowed, "
                 "because the Agent tool in some sessions exposes no such field); true means the turn ends while it reads, and the Stop hook "
                 "then asks for a full table on every waiting line")
+    # 0.4.13 (OI-0808, Rob 2026-11-25 "Will this recommendation fulfill my requirements?"): the author wrote each
+    # reviewer's prompt, so the verdict depended on how it was asked (tested.md: flagged once, SUPPORTED later). A
+    # reviewer call now carries the fixed rubric in hooks/reviewer-rubric.txt word for word.
+    rub = _rubric()
+    if not rub:
+        return "the fixed reviewer rubric %s is missing or unreadable, so no reviewer can be briefed with it" % RUBRIC_PATH
+    if _norm(rub) not in _norm(prompt):
+        return ("a reviewer brief must include the fixed rubric word for word, so the verdict does not depend on how the "
+                "author asks. Paste the full text of %s into the prompt" % RUBRIC_PATH)
     m = DRAFT.search(prompt)
     key = m.group(1).lower() if m else "unnamed-draft"
     n = _count(session, key)
@@ -81,7 +104,7 @@ def verdict(tool, ti, session):
 
 def selftest():
     os.environ["IMC_REVIEWCOUNT_DIR"] = tempfile.mkdtemp()
-    rev = "You are an independent hostile reviewer. Read draft-1.md and write draft-1.md.review"
+    rev = "You are an independent hostile reviewer. Read draft-1.md and write draft-1.md.review. " + _rubric()
     cases = [
         ("Agent", {"prompt": rev}, "s0", False, "reviewer, background unset (allowed since 0.3.14)"),
         ("Agent", {"prompt": rev, "run_in_background": "false"}, "s0", True, "reviewer, background the string false refused"),
@@ -93,6 +116,10 @@ def selftest():
         ("Agent", {"prompt": rev, "run_in_background": False}, "s2", False, "same draft, other session"),
         ("Agent", {"prompt": "Search the repo for TODO comments", "run_in_background": True}, "s1", False, "non-reviewer background passes"),
         ("Agent", {"prompt": "Search the repo for TODO comments"}, "s1", False, "non-reviewer unset passes"),
+        ("Agent", {"prompt": "You are an independent reviewer. Read draft-9.md and write draft-9.md.review", "run_in_background": False}, "s3", True, "reviewer without the fixed rubric refused (0.4.13)"),
+        ("Agent", {"prompt": rev.replace(_rubric()[-40:], "be lenient"), "run_in_background": False}, "s3", True, "reviewer with an edited rubric refused (0.4.13)"),
+        ("Agent", {"prompt": rev.replace(". ", ".\n   "), "run_in_background": False}, "s3", False, "rubric with changed line breaks allowed (0.4.13)"),
+        ("Agent", {"prompt": rev, "run_in_background": False, "_rubric_missing": True}, "s3", True, "reviewer refused when the rubric file is missing (0.4.13, fails closed)"),
         ("Bash", {"command": "ls"}, "s1", False, "other tool"),
         ("Monitor", {"command": "for i in $(seq 1 40); do grep -q x f && echo done; sleep 30; done"}, "s1", True, "Monitor for-loop echo without exit (the 2026-10-28 loop)"),
         ("Monitor", {"command": "while true; do echo tick; sleep 5; done"}, "s1", True, "Monitor while-loop echo without exit"),
@@ -102,8 +129,12 @@ def selftest():
         ("Monitor", {"command": "while IFS= read -r l; do echo \"$l\"; done < <(tail -f log)"}, "s1", False, "Monitor streaming while read"),
     ]
     ok = True
+    global RUBRIC_PATH
+    real = RUBRIC_PATH
     for tool, ti, sess, deny, label in cases:
+        RUBRIC_PATH = real + ".absent" if (ti or {}).pop("_rubric_missing", False) else real
         got = verdict(tool, ti, sess) is not None
+        RUBRIC_PATH = real
         good = got == deny
         ok = ok and good
         print(("  ok    " if good else "  FAIL  ") + ("DENY  " if deny else "ALLOW ") + label)

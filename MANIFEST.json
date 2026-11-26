@@ -1,9 +1,9 @@
 {
- "version": "0.4.12",
- "serial": 14,
+ "version": "0.4.13",
+ "serial": 15,
  "files": {
-  ".claude-plugin/plugin.json": "f24dfe164568736f130cb83e73bac2a53c3d447c66617cf3298e5c50ec161cfe",
-  "CORE-RELEASE.txt": "05821f6ff2f96da8b34013974a41aea9978ae2774a49680dbc050b9a59a499f1",
+  ".claude-plugin/plugin.json": "8a9f50632ede65bb8eafe3bf53fca5e620ebb59c915b780309bbe706781fa764",
+  "CORE-RELEASE.txt": "85c191fc284e70a33e3d185304e09b2ffdc160d573298e87654d096dd18a7429",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -54,13 +54,14 @@
   "checker/transcript_util.py": "f15d59c52acf5e8696a1ed36b480a1f27a4e7c8014bdfbc78802e3fdbeb0b5e5",
   "checker/turnkey_selftest.py": "438da570e8ed36cd351dee4b962a4680b53654b1a9aadfd815e6874dc0a62c21",
   "checker/waivers.txt": "6e9b2198c01d2de17394fb943550dc0cb9c9911e5a1d2faa54c6292e8b74a786",
-  "hooks/agentguard.py": "85d5af78f0c372a001d3ada6f6965f6a88aaff90ce2784177e1de9b2ce3786ec",
+  "hooks/agentguard.py": "f6c8c9a9885d10e349d9d25caa2e37951e0760469cb2a9b9890c7575bb9e5fa4",
   "hooks/approvalledger.py": "6ab384d2f80cbced14544d6d58056d2f7a350f465f0ece49fe14b01b1926478e",
   "hooks/editlogguard.py": "424ae9c878619ddbd3b64c093d29c9b072e00c02c5abf0f4292d25d093627262",
-  "hooks/gate.py": "cea6c538a9e492df62e28fd7e1d3675deed2593e6c1eb2bc0c64f5a793e516b6",
+  "hooks/gate.py": "f9e0ba344b22055f7ab98a8bd761bba9bb9de6d8ac7a73377261f175b1a177e0",
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
   "hooks/intakeguard.py": "45175977a622f0eebfdc6637c4fb86f7c8e971ba7cecbc68ac78bb1a34b1d2dc",
   "hooks/preaction.py": "620e2c744dbd3d3eeba6f8ce55ef62f3a5c8257015fc5bbb9cebadb62ebd9654",
+  "hooks/reviewer-rubric.txt": "63316a31e048614b378d71ab7f8ef3c40034f0b0356ffa8466972931b16838a6",
   "hooks/reviewpanel.py": "8acfa1569e8e4b995465cd0146a615af550824e9142ef26007eb33d765307bde"
  }
 }

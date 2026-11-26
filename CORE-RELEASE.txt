@@ -1,1 +1,1 @@
-imc-reply-gate core serial 14 (0.4.12): precheck refuses a next-steps table unless the reviewer's RECOMMENDATION-CHECK opens with SUPPORTED (OI-0808, Rob ruled "release" 2026-11-25 5:43 PM PST), and the per-turn reminder asks reviewers for that opening.
+imc-reply-gate core serial 15 (0.4.13): a reviewer Agent call must carry the fixed rubric in hooks/reviewer-rubric.txt word for word (OI-0808), so the verdict precheck enforces no longer depends on how the author asks.
