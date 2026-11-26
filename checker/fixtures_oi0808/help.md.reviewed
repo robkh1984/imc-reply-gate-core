@@ -1,0 +1,21 @@
+CORRECTION: my last closing line, "No, they were not tested before I showed them to you", repeated the stamped answer without its blocker. The blocker is your choice in row 1 below.
+
+Yes, for the part of your requirement it targets: every recommendation tested before it reaches you. I measured the refined rule on all 46 premise-only rows in this session's drafts. It catches the 19 rows where I would change something, so each would need a real run first. It passes the other 27, which are pure decisions or acts for you, where there is nothing for me to run.
+
+My first prototype was worse: matching any change word, it caught 29 of your own decision rows, such as "press Add". That is why the rule below keys on me doing the change.
+
+It does not touch your other requirement, the gate on every session, chat and scheduled task. That one is already met.
+
+ROOT CAUSE: measured - the gate's check_untested_rec passes any TESTED label, premise-only included.
+
+CHECKED: `python3` scan of the 46 "TESTED (premise only)" rows in this session's drafts with the refined rule (owner Claude, or an Action saying "I fix", "I build", "I create" and similar) -> 19 flagged, 27 passed, every flagged row proposing a change by me; 2026-11-25 4:53 PM PST.
+CHECKED: `python3` scan of the same 46 rows with the first prototype's word list -> 35 flagged, 29 of them owned by you, such as "Do: on the "Imc reply gate, From imc-claude-plugins" page ... press Add"; 2026-11-25 4:52 PM PST.
+CHECKED: `get_values` on the health-log sheet -> both health checks "PASS" on "v12-e8ed2afec53d", read at 3:12 PM PST; Control_Chrome chat_conversations?limit=200 -> 17 of 17 conversations with a workspace session, read at 4:20 PM PST; 2026-11-25.
+PRE-SEND REVIEW: independent reviewer returned 0 findings; 0 fixed; fixed rows none.
+SELF-CHECK: thorough: yes, confidence: 9/10 in row 1, lower if a released rule flags a pure decision row of yours.
+
+PROJECT OBJECTIVE 4 - The AI Prompt Library pipeline [IN PROGRESS]
+OBJECTIVE 1 - Rulings that wait on Rob (this session, under project objective 4) [IN PROGRESS]
+| # | Issue / Risk | Action | Owner | Recommendation | Pros | Cons |
+|---|---|---|---|---|---|---|
+| 1 | OI-0808 (recommendations sent as premise-only): the gate passes any TESTED label. CAUSE: measured - 19 of today's 46 premise-only rows proposed a change by me. BLOCKS: none | Decide: "refuse" - the gate refuses premise-only on a row I own or whose Action says I will change something, so I run the change first; or "keep" | Rob | RECOMMEND: choose "refuse", because on today's drafts it caught all 19 change rows and none of your 27 pure decisions. TESTED: the scan above on all 46 premise-only rows of this session; the rule was tuned on these same rows, so a run on other sessions' drafts comes after release | Change rows can no longer reach you on a premise alone | Con:&nbsp;each&nbsp;change&nbsp;row&nbsp;costs&nbsp;a&nbsp;test&nbsp;run<br>• Risk: an oddly worded change row slips past.<br>• Mitigation: the scan reruns on each release's drafts. |

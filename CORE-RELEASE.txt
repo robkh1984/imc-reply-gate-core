@@ -1,1 +1,1 @@
-imc-reply-gate core serial 13 (0.4.11): precheck runs the Stop hook's own table-row checks and timezone check, the timezone check no longer pairs a quoted date with a later time, TABLE UNCHANGED is judged the same in both, and the reviewer panel allows one round per draft.
+imc-reply-gate core serial 14 (0.4.12): precheck refuses a next-steps table unless the reviewer's RECOMMENDATION-CHECK opens with SUPPORTED (OI-0808, Rob ruled "release" 2026-11-25 5:43 PM PST), and the per-turn reminder asks reviewers for that opening.

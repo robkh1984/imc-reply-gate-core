@@ -1,0 +1,29 @@
+DRAFT: help.md
+DRAFT-SHA256: ec1e03451ac264eb1a503ca0ab3e5d43e1c1496ab4409f757659794db86d39f7
+FINDINGS: 12
+NEW FINDINGS: 12
+RECOMMENDATION-CHECK: PARTLY SUPPORTED - "refuse" follows for change rows, but its TESTED clause is an in-sample scan of a rule tuned on the same rows, with the 19 "change rows" defined by the rule itself, so "caught all 19" is circular; no run of the gate (precheck or replycheck) refusing a row is shown. The recommendation also leaves 27 premise-only recommendations passing, so it does not deliver "every recommendation tested", which the reply's "Yes" implies.
+1. Wrong scope word: row 1 CAUSE says "19 of today's 46 premise-only rows", while CHECKED line 11 and paragraph 2 say "this session's drafts". The session's drafts span Nov 24 and Nov 25; 13 of the 44 premise-only table rows in the scratchpad drafts are in files dated 2026-11-24 (route, test091, notif, sync3, options, opt2, read1, long, built, syncfail, live, rec2, ask). "today's" is wrong.
+2. The 46-row figure does not reproduce: the scratchpad .md drafts hold 44 table rows with "TESTED (premise only)" (45 occurrences counting prose). No saved scan script or list of the 46 rows is cited, so 19/27 cannot be checked.
+3. Circular claim: "it caught all 19 change rows and none of your 27 pure decisions" (row 1) and "It catches the 19 rows where I would change something" (paragraph 2). The only evidence is that the rule flagged 19 and passed 27; nothing labels the rows independently, so recall (no change row among the 27) is asserted, not measured. CHECKED line 11 checks only that flagged rows propose changes (precision).
+4. Overstated false-positive count: paragraph 3 says the first prototype "caught 29 of your own decision rows", but CHECKED line 12 says only that 29 of the 35 flagged rows were "owned by you". Rob-owned rows include rows whose Action says I will change something (only 6 of 44 premise-only rows are owned by Claude, so most of the 19 change rows are Rob-owned). Some of the 29 are therefore true hits, not decision rows.
+5. Overstated answer: "Yes, for the part of your requirement it targets" then "each would need a real run first" - the requirement is "every recommendation tested", and the rule still passes 27 premise-only recommendations. The reply states as fact that pure decisions have "nothing for me to run" without saying this is an exception to Rob's rule that he has not approved (the same point was disputed in the tested.md review).
+6. Overstated/unsupported: "That one is already met" (paragraph 4). Rob's requirement is precheck, reply gate and independent reviewers on every session, chat and scheduled task. CHECKED line 13 shows two health checks and 17 of 17 conversations with a workspace session; it does not show scheduled tasks, precheck runs, or independent reviewers on each surface.
+7. Stale evidence for "already met": CHECKED line 13's health checks are "PASS on v12-e8ed2afec53d" read at 3:12 PM PST, but the prior reply (tested.md) says core serial 13 (0.4.11) went live at 4:45 PM PST. No check shows v13 on every surface; the 4:20 PM PST conversation read also predates the release.
+8. The CORRECTION line quotes "my last closing line" as "No, they were not tested before I showed them to you". The previous draft in this folder (tested.md, 4:50 PM PST) opens "No, they were not." and contains no such sentence; the quoted line is found nowhere but help.md. Unverifiable, and "closing" vs opening is unclear.
+9. Contradiction: line 1 says the stamped answer lacked "its blocker", and "The blocker is your choice in row 1", but row 1 says "BLOCKS: none".
+10. Unsupported mitigation: "the scan reruns on each release's drafts" - no script, check or task that does this is named or shown; it is a promise, not a mechanism.
+11. Unclear wording: "pure decisions or acts for you" (paragraph 2) and "owner Claude, or an Action saying 'I fix', 'I build', 'I create' and similar" (CHECKED line 11) - "and similar" leaves the released rule undefined, so Rob cannot tell what he is approving; "acts for you" is not defined.
+12. Unsupported rule claim: row 1 Action says the gate refuses premise-only "on a row I own or whose Action says I will change something", while paragraph 3 says the rule "keys on me doing the change". The scan matched literal verbs, not intent; "says I will change something" is broader than the tested word list.
+VERIFIED:
+- ROOT CAUSE "check_untested_rec passes any TESTED label, premise-only included" -> v13 replycheck.py lines 824-836: "_lab = re.search(r'\b(UNTESTED|TESTED)\b', rec); if _lab and _lab.group(1) == 'TESTED': continue" -> SUPPORTED.
+- "46 premise-only rows in this session's drafts" -> grep of scratchpad *.md: 44 table rows, 45 occurrences excluding help.md -> NOT REPRODUCED.
+- "today's 46" -> 13 of 44 rows in files dated 2026-11-24 -> WRONG.
+- "19 flagged, 27 passed" -> my approximation (owner Claude or Action "I fix/build/create/add/change/...") -> 15 flagged; owner split Rob 38, Claude 6 -> NOT REPRODUCED (word list differs, no script cited).
+- "29 of your own decision rows" -> CHECKED line 12 says "owned by you" -> OVERSTATED.
+- "That one is already met" -> CHECKED line 13 (health PASS v12 at 3:12 PM PST; 17 of 17 conversations at 4:20 PM PST) -> PARTLY SUPPORTED, stale against v13 release at 4:45 PM PST, no scheduled-task or reviewer coverage.
+- CORRECTION quote -> tested.md opens "No, they were not."; quote absent from any other draft -> UNVERIFIED.
+- "BLOCKS: none" vs "The blocker is your choice in row 1" -> CONTRADICTION.
+- Times: CHECKED 4:52 and 4:53 PM PST 2026-11-25; help.md mtime 4:56 PM PST; now 4:57 PM PST; PST correct for Nov 25 -> CONSISTENT.
+- Recommendation TESTED clause -> discloses in-sample tuning; no gate run shown -> PARTLY SUPPORTED.
+- Answers Rob's question -> opens "Yes, for the part ..." and addresses both requirements -> ANSWERS, but overstated (findings 5, 6).

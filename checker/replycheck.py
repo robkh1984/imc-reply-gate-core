@@ -3333,6 +3333,17 @@ def check_presend_review(text):
                  "went to the reviewer, so the reviewer says, in its own words, whether each "
                  "Recommendation cell actually recommends something or only reports a run. No regex "
                  "can decide that, which is why it is asked of the reviewer and recorded here." % rp)
+        # 0.4.12 (OI-0808, Rob 2026-11-25 "Can you confirm that these recommendations were measured and tested"):
+        # in all five tables Rob caught that day, the reviewer had already written that the recommendation was
+        # only partly supported, and the author sent it anyway. The verdict is now a token the gate reads: the
+        # line must open SUPPORTED or NOT SUPPORTED, and a stamp is refused unless it opens SUPPORTED.
+        _rv = re.search(r"^\s*RECOMMENDATION-CHECK:\s*(\S.*)$", rt, re.M)
+        if NEXT_STEPS_HEADER.search(text) and re.search(r"^\|[^\n]*\bRECOMMEND\b", text, re.M) and _rv and \
+                not re.match(r"SUPPORTED\b", _rv.group(1).strip()):
+            fail("REC-NOT-SUPPORTED",
+                 "the reviewer's RECOMMENDATION-CHECK on %s does not open with SUPPORTED: %r. A recommendation the "
+                 "reviewer did not support is not sent: fix it and have the final draft reviewed, or withdraw the "
+                 "RECOMMEND (OI-0808)." % (rp, _rv.group(1)[:90]))
 
 
 # *** TABLE-LAST, ROB APPROVED 2026-10-14 09:41 PDT, "must apply on every surface" (imc-reply-gate 0.2.4). ***
