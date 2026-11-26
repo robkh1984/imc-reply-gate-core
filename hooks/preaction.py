@@ -263,6 +263,25 @@ def hook():
         print("PREACTION: unreadable hook input; refusing", file=sys.stderr)
         return 2
     session = d.get("session_id") or os.environ.get("CLAUDE_SESSION_ID") or ""
+    # 0.4.16 (Rob 2026-11-26, O1 step 1): the release freeze runs first and on every tool, stamped or not.
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import releaselock
+        _rc, _rm = releaselock.check(d.get("tool_name", ""), d.get("tool_input") or {}, session, cwd=d.get("cwd"))
+        if _rc:
+            print(_rm, file=sys.stderr)
+            return 2
+    except Exception as _e:
+        print("PREACTION: release-lock check crashed (%s); allowing" % _e, file=sys.stderr)
+    # 0.4.16 (O1 step 2): nothing but the PostToolUse ledger hook may write the evidence ledger.
+    try:
+        import ledger
+        _gc, _gm = ledger.guard(d.get("tool_name", ""), d.get("tool_input") or {})
+        if _gc:
+            print(_gm, file=sys.stderr)
+            return 2
+    except Exception as _e:
+        print("PREACTION: ledger guard crashed (%s); allowing" % _e, file=sys.stderr)
     code, msg = decide(d.get("tool_name", ""), d.get("tool_input") or {}, session, off=os.environ.get("IMC_PREACTION") == "off")
     try:
         os.makedirs(DIR, exist_ok=True)
