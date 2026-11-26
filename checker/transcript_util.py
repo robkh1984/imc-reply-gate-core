@@ -9,6 +9,14 @@ def find_transcript():
     if p and os.path.isfile(p):
         return p
     c = glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl"))
+    # 0.4.19 (O1, measured 2026-11-26 09:44 PST in cloud session 8f8a8a55): precheck read the transcript of a child
+    # `claude -p` probe run from /tmp/o1cloud (folder -tmp-o1cloud, which the -tmp filter below missed) and reported
+    # SCOPE-UNREAD for a path only that probe's prompt named. A file named after this session's id wins; when the id is
+    # known and its file is absent, no transcript is reported instead of another session's.
+    sid = os.environ.get("CLAUDE_CODE_SESSION_ID") or os.environ.get("CLAUDE_SESSION_ID") or ""
+    if sid:
+        own = [x for x in c if os.path.basename(x) == sid + ".jsonl"]
+        return max(own, key=os.path.getmtime) if own else None
     # 0.3.84 (OI-0491 LIVE-READ-MISSING): reviewpanel.py runs `claude -p` probes whose cwd is a temp
     # directory, so the harness writes their transcripts under ~/.claude/projects/-tmp/ and
     # ~/.claude/projects/-private-tmp/. Those are the NEWEST jsonl right after a panel run, so the
@@ -16,7 +24,7 @@ def find_transcript():
     # reading the transcript then saw a session that had made no tool calls. Measured 2026-11-20
     # 09:40 PST: the only jsonl in a cloud container was ~/.claude/projects/-tmp/bc2eddb8-....jsonl
     # with 0 occurrences of memory_read, in a session that had just read two memory files.
-    real = [x for x in c if not re.match(r"^-(?:private-)?tmp$|^-var-folders", os.path.basename(os.path.dirname(x)))]
+    real = [x for x in c if not re.match(r"^-(?:private-)?tmp(?:-|$)|^-var-folders", os.path.basename(os.path.dirname(x)))]
     if real:
         return max(real, key=os.path.getmtime)
     # Only probe transcripts exist: returning one of them produces a FALSE failure, so report no

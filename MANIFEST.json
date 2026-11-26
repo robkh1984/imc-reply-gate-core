@@ -1,7 +1,7 @@
 {
  "files": {
   ".claude-plugin/plugin.json": "4a14b857d1b7fe4afd535646ab9717d9ec8ee1570483c84e1c3d67bad7c4626f",
-  "CORE-RELEASE.txt": "81b2a495f4db42477fc1900268f1fffac0269a4a9328456970a23242e79ed7d5",
+  "CORE-RELEASE.txt": "90c7752cb16eb57fd97ec88f635e83049774f816278a93c17ff1f675e640234d",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -17,6 +17,7 @@
   "checker/corrwaiver_selftest.py": "0f281f191f95bc3620c2f72f08bbe67635f034357449d8cdff30e427dff2d66b",
   "checker/exception_selftest.py": "7fcc2453fd9af5427dd0297c3eedd63775b1420b5e1c89515b87d324fc61b672",
   "checker/fieldclaimcheck.py": "fa6860fc6b75af9f7b791e3755f11db5bc27939a4e70d11945ce1446edcf2b34",
+  "checker/findtranscript_selftest.py": "a180a709b4601714901bd8019274c48a0aafa04ed0e30e0986ccb20c9df5f489",
   "checker/fixtures_o1/D01.md": "789b35e626c798aae8806a684d8d052c6930c4446123acda451d5e3c79d187c9",
   "checker/fixtures_o1/D02.md": "313e6ce89b3292aef5f647ac35aa6a7e33a741db3d772114dce1c620a47c2041",
   "checker/fixtures_o1/D03.md": "15da3b82a8e839770990f5a6850666114fba9d8afc0e25d4d8cbafc83ea3697b",
@@ -64,7 +65,7 @@
   "checker/tabletwice_selftest.py": "0a70dfc7c3e82df6a3e3e164a5041a9f6bdd5f8e7a4efa4613c00af3b0f822d6",
   "checker/taskform_selftest.py": "906f534695f10fb919ae57c79defb65646c725704ff9040887fb9f3ae7c98178",
   "checker/titles.tsv": "7b4044f2be6be6e232964139f939a5bcabab06e754368ed7c50c712fa0c5f88d",
-  "checker/transcript_util.py": "f15d59c52acf5e8696a1ed36b480a1f27a4e7c8014bdfbc78802e3fdbeb0b5e5",
+  "checker/transcript_util.py": "fa5c6a2335ca433c6c4b4a08f27136282fa1abd98ea75ce86ee84e37c6022563",
   "checker/turnkey_selftest.py": "438da570e8ed36cd351dee4b962a4680b53654b1a9aadfd815e6874dc0a62c21",
   "checker/waivers.txt": "6e9b2198c01d2de17394fb943550dc0cb9c9911e5a1d2faa54c6292e8b74a786",
   "hooks/agentguard.py": "f6c8c9a9885d10e349d9d25caa2e37951e0760469cb2a9b9890c7575bb9e5fa4",
@@ -79,6 +80,6 @@
   "hooks/reviewer-rubric.txt": "63316a31e048614b378d71ab7f8ef3c40034f0b0356ffa8466972931b16838a6",
   "hooks/reviewpanel.py": "8acfa1569e8e4b995465cd0146a615af550824e9142ef26007eb33d765307bde"
  },
- "serial": 20,
- "version": "0.4.18"
+ "serial": 21,
+ "version": "0.4.19"
 }
