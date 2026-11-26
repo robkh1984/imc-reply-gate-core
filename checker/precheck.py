@@ -133,8 +133,21 @@ def main(argv):
     with open(draft, encoding="utf-8", errors="replace") as f:
         text = f.read()
     fails = re.findall(r"^FAIL  \[([^\]]+)\] (.*)$", p.stdout, re.M) + gate._gap_fails(text)
-    fails += gate.table_start_fails(text) + gate.rob_owns_work_fails(text)  # 0.2.13
-    fails += gate.claude_row_runnable_fails(text)  # 0.3.51
+    if hasattr(gate, "table_row_fails"):  # 0.4.11: the Stop hook's own list (OI-0805)
+        fails += gate.table_row_fails(text)
+    else:
+        fails += gate.table_start_fails(text) + gate.rob_owns_work_fails(text)  # 0.2.13
+        fails += gate.claude_row_runnable_fails(text)  # 0.3.51
+    # 0.4.11 (OI-0805): the Stop hook blocks on the timezone check whether or not the panel runs; precheck only
+    # warned through the panel, and not at all when the panel was skipped. Run it here as a FAIL.
+    try:
+        import importlib.util as _tzu
+        _tzs = _tzu.spec_from_file_location("imc_reviewpanel_tz", os.path.join(os.path.dirname(HERE), "hooks", "reviewpanel.py"))
+        _tzm = _tzu.module_from_spec(_tzs); _tzs.loader.exec_module(_tzm)
+        for _b in _tzm.tzcheck(text):
+            fails.append(("TZCHECK", _b))
+    except Exception as _tze:
+        fails.append(("TZCHECK-ERRORED", "the timezone check could not run (%s)" % str(_tze)[:120]))
     _pf = presend_fails(draft)
     # 0.3.78 (Rob approved 2026-11-19 5:46 PM PST): replygate.py was skipped in total silence, because
     # presend_fails only ever looked for presend.py. Tested on a copy at /tmp/pctest2 first: unpatched,

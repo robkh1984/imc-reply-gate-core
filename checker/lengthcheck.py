@@ -94,6 +94,26 @@ def previous_draft(draft_path, stamps=STAMPS):
 UNCHANGED_RE = re.compile(r"^TABLE UNCHANGED since (?:the last reply|\S+.*)$", re.M)
 
 
+def previous_table_draft(text, draft_path=None, stamps=STAMPS):
+    """0.4.11 (OI-0807): the newest stamped draft that is not this reply. In the Stop hook there is
+    no draft path, so previous_draft("") returned the TABLE UNCHANGED reply's own stamped draft, which has no table,
+    and the Stop hook refused a line precheck had accepted (measured 2026-11-25, stamp ecf9f32c496c68b9)."""
+    if not os.path.isfile(stamps):
+        return None
+    here = text.strip()
+    for ln in reversed(open(stamps, encoding="utf-8", errors="replace").read().splitlines()):
+        parts = ln.split("\t")
+        if len(parts) < 3 or parts[0] == "FAIL" or not os.path.isfile(parts[2]):
+            continue
+        if draft_path and os.path.abspath(parts[2]) == os.path.abspath(draft_path):
+            continue
+        body = open(parts[2], encoding="utf-8", errors="replace").read()
+        if body.strip() == here:
+            continue
+        return body  # the newest other stamped draft; the caller requires it to hold a table, as precheck does
+    return None
+
+
 def unchanged_line_ok(text, draft_path=None, prev=None):
     """0.3.6 (Rob 2026-10-23 18:36 PDT, row 1 'Agree'): a reply whose rows did not change carries the line
     'TABLE UNCHANGED since the last reply' instead of the table. Valid only when the draft holds no table and the
@@ -101,7 +121,7 @@ def unchanged_line_ok(text, draft_path=None, prev=None):
     if not UNCHANGED_RE.search(text) or tables(text):
         return False
     if prev is None:
-        prev = previous_draft(draft_path or "")
+        prev = previous_table_draft(text, draft_path)
     return bool(prev and tables(prev))
 
 

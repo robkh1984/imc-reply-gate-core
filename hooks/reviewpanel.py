@@ -10,7 +10,7 @@ Panel set (Rob 2026-10-23 4:55 PM PDT): 1 default + 2 haiku + 1 opus, run in par
 import datetime, glob, hashlib, json, os, re, subprocess, sys, tempfile, time, concurrent.futures as cf
 
 PANEL = [("default", None), ("haiku-1", "haiku"), ("haiku-2", "haiku"), ("opus", "opus")]
-MAX_ROUNDS = 3
+MAX_ROUNDS = 1  # 0.4.11 (Rob 2026-11-25 "now", OI-0802 under OI-0755): one panel round per draft; 5 rounds of 13 to 18 findings never converged
 HOOK_BUDGET_S = 140
 CLEAN_ENV_DROP = ("CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_REMOTE_SESSION_ID", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_AFTER_LAST_COMPACT")
 STATE = os.path.expanduser("~/.claude/reviewpanel-state.json")
@@ -63,7 +63,9 @@ def us_dst(d):
     return nth_sunday(d.year, 3, 2) <= d < nth_sunday(d.year, 11, 1)
 
 MONTHS = {m: i for i, m in enumerate("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(), 1)}
-TZ_RE = re.compile(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.? (\d{1,2})(?:,? (\d{4}))?[^.\n|]{0,40}?\b(\d{1,2}:\d{2}\s?[AP]M)\s+(P[SD]T)\b")
+# 0.4.11 (OI-0805): the gap between date and time may not cross ';' or '"', so a quoted log date followed by a separate
+# clock time ('"Oct 16 15:08:12 2026"; 3:01 PM PST') is not read as one timestamp (false positive measured 2026-11-25).
+TZ_RE = re.compile(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.? (\d{1,2})(?:,? (\d{4}))?[^.;\"\n|]{0,40}?\b(\d{1,2}:\d{2}\s?[AP]M)\s+(P[SD]T)\b")
 
 def tzcheck(text, default_year=None):
     default_year = default_year or datetime.date.today().year

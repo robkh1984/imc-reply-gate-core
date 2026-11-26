@@ -752,6 +752,13 @@ def claude_row_runnable_fails(text):
     return out
 
 
+def table_row_fails(text):
+    """0.4.11 (Rob 2026-11-25 4:38 PM PST "now", OI-0805): the Stop hook and precheck each listed their own table-row
+    checks, so precheck lacked one_decision_fails and exception_fails and stamped a reply the Stop hook then blocked
+    on ONE-DECISION (measured 2026-11-25, stamp c4aa6eed92de76ea). Both now call this one list."""
+    return (table_start_fails(text) + rob_owns_work_fails(text) + one_decision_fails(text) + exception_fails(text)
+            + claude_row_runnable_fails(text))
+
 def exception_fails(text):
     """0.3.2 EXCEPTION-REJECTED (Rob 2026-10-23, 'I don't like exceptions'): a next-steps row whose Action or
     Recommendation recommends an exemption, exception, waiver or baseline raise fails. A row that only names an
@@ -1545,8 +1552,7 @@ def main():
         except Exception as e:
             log(mode, "note", session=session, detail="stop no-table stamp lookup failed: %s" % e)
     if table_info(text):
-        fails += table_start_fails(text) + rob_owns_work_fails(text) + one_decision_fails(text) + exception_fails(text)  # 0.2.13, 0.2.20, 0.3.2
-        fails += claude_row_runnable_fails(text)  # 0.3.51
+        fails += table_row_fails(text)  # 0.2.13, 0.2.20, 0.3.2, 0.3.51; 0.4.11 one list shared with precheck
         _rr = rec_relevance_fails(text)  # 0.3.54, warn-only until REC_RELEVANCE_ENFORCE is True
         if _rr:
             if REC_RELEVANCE_ENFORCE:
