@@ -179,6 +179,13 @@ def guard(tool, tinput):
                        "and is refused. Read it with cat/grep, or copy it with: python3 ledger.py export <session> <dest>" % (target.strip(), tool))
         return 0, "not the ledger"
     cmd = t.get("command") or t.get("script") or ""
+    # 0.4.18: quoted prose (a quoted argument that contains whitespace, such as a register row or a commit message that
+    # names the ledger path) is not a write target; measured 2026-11-26 09:31 PST, serial 19 refused bin/openitems.py add
+    # for that reason, and a heredoc that edits this file. A quoted path with no spaces still counts. A script that hides
+    # the path inside spaced quotes can get past this guard; ledger.py verify still catches any line it writes.
+    if isinstance(cmd, str):
+        cmd = re.sub(r"<<-?\s*['\"]?(\w+)['\"]?\n.*?\n\1\b", "<<HEREDOC", cmd, flags=re.S)  # heredoc bodies are data
+        cmd = re.sub(r'"(?:[^"\\]|\\.)*\s(?:[^"\\]|\\.)*"' + r"|'[^']*\s[^']*'", '""', cmd)
     if isinstance(cmd, str) and FOLDER_RE.search(cmd):
         segs = [s for s in re.split(r"&&|\|\||;|\n|\|", cmd) if FOLDER_RE.search(s)]
         if re.search(r"(?<![&<])>{1,2}|\btee\b|-i\b|--in-place", cmd) and any(FOLDER_RE.search(s) for s in re.split(r">{1,2}", cmd)[1:]):
@@ -253,6 +260,11 @@ def selftest():
     t("GUARD allows ledger.py verify", guard("Bash", {"command": "python3 /h/ledger.py verify %s" % lp})[0], 0)
     t("GUARD allows an unrelated Write", guard("Write", {"file_path": "/tmp/draft.md", "content": "x"})[0], 0)
     t("GUARD allows writing some other evidence.log (the 2026-11-26 prototype's ledger.sh)", guard("Bash", {"command": "echo x | tee -a ~/Claude/tmp/review-20261126/o1smoke/evidence.log"})[0], 0)
+    t("GUARD allows a register row whose prose names the ledger path", guard("Bash", {"command": "python3 bin/openitems.py add --item \"writes ~/.claude/imc-evidence/<session>/evidence.log per call\" --status OPEN"})[0], 0)
+    t("GUARD allows a commit message naming the ledger root", guard("Bash", {"command": "git commit -m 'ledger lives in ~/.claude/imc-evidence now'"})[0], 0)
+    t("GUARD allows a heredoc whose body names the ledger root", guard("Bash", {"command": "python3 - <<'EOF'\nprint('imc-evidence')\nEOF"})[0], 0)
+    t("GUARD still refuses a quoted path target with no spaces", guard("Bash", {"command": "echo x >> \"%s\"" % lp})[0], 2)
+    t("GUARD still refuses python open on an unspaced quoted path", guard("Bash", {"command": "python3 -c \"open('%s','a').write('x')\"" % lp})[0], 2)
     t("GUARD refuses tee into the real ledger root", guard("Bash", {"command": "echo x | tee -a ~/.claude/imc-evidence/s/evidence.log"})[0], 2)
     out = export(S, os.path.join(DIR, "exp"))
     t("export copy verifies with the exported key", verify(out, os.path.join(DIR, "exp", ".ledger-key"))[1], [])
