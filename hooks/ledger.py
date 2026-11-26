@@ -28,7 +28,6 @@ import datetime, hashlib, hmac, json, os, re, secrets, shutil, sys
 
 DIR = os.environ.get("IMC_EVIDENCE_DIR") or os.path.expanduser("~/.claude/imc-evidence")
 HEAD, TAIL = 700, 300
-FOLDER_RE = re.compile(r"imc-evidence|evidence\.log")
 READERS = re.compile(r"^\s*(cat|head|tail|grep|rg|wc|ls|stat|sha256sum|shasum|python3?\s+\S*ledger\.py\s+(verify|path|export)|"
                      r"python3?\s+\S*ledgerreview\.py)\b")
 
@@ -169,7 +168,9 @@ def verify(lp, keyfile=None):
 
 
 def guard(tool, tinput):
-    """(0, why) allow / (2, message) refuse: nothing but this hook writes the ledger folder."""
+    """(0, why) allow / (2, message) refuse: nothing but this hook writes the ledger folder. Only the ledger root
+    (~/.claude/imc-evidence or IMC_EVIDENCE_DIR) is guarded; other files that happen to be called evidence.log are not."""
+    FOLDER_RE = re.compile("imc-evidence|" + re.escape(DIR))
     t = tinput if isinstance(tinput, dict) else {}
     if tool in ("Write", "Edit", "NotebookEdit", "MultiEdit") or tool.endswith(("write_file", "edit_block", "move_file", "edit_file", "create_directory")):
         target = " ".join(str(t.get(k, "")) for k in ("file_path", "path", "source", "destination", "notebook_path"))
@@ -251,6 +252,8 @@ def selftest():
     t("GUARD allows cat and grep of the ledger", guard("Bash", {"command": "cat %s | grep wc" % lp})[0], 0)
     t("GUARD allows ledger.py verify", guard("Bash", {"command": "python3 /h/ledger.py verify %s" % lp})[0], 0)
     t("GUARD allows an unrelated Write", guard("Write", {"file_path": "/tmp/draft.md", "content": "x"})[0], 0)
+    t("GUARD allows writing some other evidence.log (the 2026-11-26 prototype's ledger.sh)", guard("Bash", {"command": "echo x | tee -a ~/Claude/tmp/review-20261126/o1smoke/evidence.log"})[0], 0)
+    t("GUARD refuses tee into the real ledger root", guard("Bash", {"command": "echo x | tee -a ~/.claude/imc-evidence/s/evidence.log"})[0], 2)
     out = export(S, os.path.join(DIR, "exp"))
     t("export copy verifies with the exported key", verify(out, os.path.join(DIR, "exp", ".ledger-key"))[1], [])
     print("ALL CONTROLS PASSED" if all(res) else "A CONTROL FAILED")
