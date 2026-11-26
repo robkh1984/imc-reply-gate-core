@@ -57,8 +57,11 @@ _EVIDENCEY = re.compile(r"\b\d{1,2}:\d{2}\b|->|→|\bexit\s*\d|`[^`]+`")
 _DIRECTIVE = re.compile(r"\b(install|upload|keep|retire|demote|delete|remove|add|run|wait|hold|"
                         r"choose|pick|take|switch|accept|decline|approve|reject|leave|revert|"
                         r"restore|raise|lower|stop|start|merge|split|rename|move|file|close|"
-                        r"do|don'?t|should|yes|no|go with|prefer|neither|either)\b", re.I)
+                        r"do|don'?t|should|yes|no|go with|prefer|neither|either|"
+                        r"ship|release|use|apply|fix|build|send|push|set|replace|change|enable|disable|paste|"
+                        r"edit|update|schedule|test|check|verify|mark|archive|cut|drop|ask|reply|hand|pass|give|tell|leave)\b", re.I)  # O2: verbs Rob's rows use
 _NO_RECOMMEND = re.compile(r"\bNO RECOMMENDATION\s*:\s*(\S.{19,})", re.I | re.S)
+_DECISION = re.compile(r"^\s*\**\s*DECISION\s*:", re.I)  # O2: a Rob decision row states the unknown, not advice
 _REC_NOOP = re.compile(r"^\s*\**\s*(none|nothing\b|no change|not until|n/?a|-|\u2014)\s*\**\s*$", re.I)
 
 _CONF = re.compile(r"(\d{1,2})\s*/\s*10\s+in\s+(?:the\s+)?(rows?\s+\d+(?:\s*(?:,|and|to)\s*\d+(?!\d|\s*/))*)", re.I)
@@ -106,33 +109,11 @@ def check(text, fail, warn):
     cited = [c for c in checked if _TIME.search(c) and _RESULT.search(c)]
     has_blocked = bool(re.search(r"\bBLOCKED\s*:", text))
 
+    # RECO-RUN and RECO-UNRUN DELETED in core serial 23 (O2, Rob 2026-11-26): both judged a cell by the words
+    # TESTED / UNTESTED. "The words TESTED or Tested: are neither required nor sufficient, and no check may pass a
+    # cell because it contains them." The cell is judged against evidence.log (sixcol.evidence_fails, ledger reviewer).
     for n, cell in sorted(recs.items()):
-        # 0.3.85: a declared no-op and an explicit NO RECOMMENDATION are not untested work, and
-        # RECO-RUN used to refuse both for carrying neither marker - so the honest way out of
-        # RECO-STATED was closed by a sibling check. A reviewer found that before Rob did.
-        if _REC_NOOP.match(cell) or _NO_RECOMMEND.search(cell):
-            continue
-        if _UNTESTED.search(cell):
-            if not re.search(r"\bBLOCKED\s*:", cell) and not has_blocked:
-                fail("RECO-RUN", "row %d says UNTESTED but names no BLOCKED: reason in the cell or the reply. "
-                     "Rob 2026-10-29 14:09 PDT: an untested recommendation names the gap it could not close." % n)
-            elif not _NOTRUN.search(cell):
-                # 0.3.28 RECO-UNRUN (Rob 2026-10-29 21:19 PDT, agreed row 7): "waits on Rob" explains why the
-                # DECISION waits, not why the test was not run. The cell itself must name a failed call, a
-                # refusal, a missing credential, trigger or approval, or an unavailable tool.
-                fail("RECO-UNRUN", "row %d says UNTESTED but its cell names no failed call, refusal, credential, "
-                     "approval or unavailable tool as the reason the test was not run. Run the test, then say "
-                     "TESTED. Rob 2026-10-29: measure, test and validate before presenting." % n)
-        elif _TESTED.search(cell):
-            if not cited:
-                fail("RECO-RUN", "row %d says TESTED but the reply has no CHECKED line with a time and a result "
-                     "(an arrow or an exit code). Rob 2026-10-29 14:09 PDT: TESTED needs the run in the same reply." % n)
-        else:
-            fail("RECO-RUN", "row %d's Recommendation carries neither TESTED nor UNTESTED. Rob 2026-10-29 14:09 PDT: "
-                 "every recommendation says whether a run stands behind it." % n)
-
-    for n, cell in sorted(recs.items()):
-        if _REC_NOOP.match(cell) or _NO_RECOMMEND.search(cell):
+        if _REC_NOOP.match(cell) or _NO_RECOMMEND.search(cell) or _DECISION.match(cell):
             continue
         m = _RECOMMEND.search(cell)
         if not m:
@@ -143,6 +124,9 @@ def check(text, fail, warn):
                  % (n, cell.strip()[:60]))
             continue
         clause = m.group(1).strip()
+        # O2, core serial 23: in the 6-column table the evidence rides in the same cell after the advice
+        # ("RECOMMEND: keep X, because evidence.log L4 shows ..."); only the advice part is judged here.
+        clause = re.split(r"(?i)\bbecause\s+evidence\.log\b|[,;]?\s*evidence\.log\b", clause, 1)[0].strip().rstrip(",;")
         if len(clause) < 20:
             fail("RECO-STATED", "row %d's RECOMMEND clause is %d characters - too thin to be advice. "
                  "Say what to do and why, in at least 20 characters. Clause: '%s'" % (n, len(clause), clause[:40]))
@@ -174,26 +158,7 @@ def check(text, fail, warn):
             fail("MEASURED-LABEL", "a CHECKED line names no command, lookup or read: '%s'. A CHECKED line without a "
                  "command cannot be re-run." % c.strip()[:70])
 
-    m = _SC_LINE.search(text)
-    if m and recs:
-        body = m.group(1)
-        pairs = [(int(a), _expand(b)) for a, b in _CONF.findall(body)]
-        for conf, rows in pairs:
-            if conf <= 5:
-                continue
-            for r in rows:
-                cell = recs.get(r)
-                if cell is not None and not (_TESTED.search(cell) and not _UNTESTED.search(cell)):
-                    fail("CONF-TESTED", "SELF-CHECK rates row %d at %d/10 but its Recommendation is not marked TESTED. "
-                         "Rob 2026-10-29 14:09 PDT: above 5/10 needs a run behind the row." % (r, conf))
-        if not pairs:
-            g = re.search(r"confidence\s*:\s*(\d{1,2})\s*/\s*10", body, re.I)
-            if g and int(g.group(1)) > 5:
-                bad = [r for r, c in recs.items() if not (_TESTED.search(c) and not _UNTESTED.search(c))]
-                if bad:
-                    fail("CONF-TESTED", "SELF-CHECK rates the whole table %s/10 but rows %s are not marked TESTED."
-                         % (g.group(1), ", ".join(str(b) for b in bad)))
-
+    # CONF-TESTED DELETED in core serial 23 (O2): it passed a confidence only when the row said TESTED.
 
 def _selftest():
     ok = [0, 0]
@@ -242,26 +207,11 @@ def _selftest():
     ck("NEGATIVE RECO-STATED: advice with a directive and no evidence token is silent",
        "RECO-STATED" in run(good_chk + hdr + "| 1 | i | a | Rob | TESTED on a copy. RECOMMEND: keep the "
                             "narrow version and retire the broad one | p | c |\n"), False)
-    ck("NEGATIVE RECO-RUN: a NO RECOMMENDATION cell is not treated as untested work",
-       "RECO-RUN" in run(good_chk + hdr + "| 1 | i | a | Rob | NO RECOMMENDATION: the two options cost "
-                         "the same and the choice is yours. | p | c |\n"), False)
-    ck("NEGATIVE RECO-RUN: a declared no-op cell is exempt",
-       "RECO-RUN" in run(good_chk + hdr + "| 1 | i | a | Rob | No change | p | c |\n"), False)
     ck("POSITIVE RECO-STATED: a bare RECOMMEND with nothing after it fires",
        "RECO-STATED" in run(good_chk + hdr + "| 1 | i | a | Rob | TESTED on a copy. RECOMMEND: yes. | p | c |\n"), True)
     ck("NEGATIVE RECO-STATED: a None cell is exempt",
        "RECO-STATED" in run(good_chk + hdr + "| 1 | i | a | Rob | None | p | c |\n"), False)
-    ck("POSITIVE: no marker fires RECO-RUN", "RECO-RUN" in run(good_chk + hdr + row_n), True)
-    ck("NEGATIVE: TESTED with a CHECKED line is silent", run(good_chk + hdr + row_t), [])
-    ck("NEGATIVE: UNTESTED with BLOCKED is silent", run(good_chk + hdr + row_u), [])
-    ck("POSITIVE: TESTED with no CHECKED line fires", "RECO-RUN" in run(hdr + row_t), True)
     row_w = "| 4 | i | a | Rob | UNTESTED: I recommend A. BLOCKED: row 4 waits on Rob (see its Action). | p | c |\n"
-    ck("POSITIVE 0.3.28: UNTESTED whose only BLOCKED is waits-on-Rob fires RECO-UNRUN",
-       "RECO-UNRUN" in run(good_chk + hdr + row_w), True)
-    ck("NEGATIVE 0.3.28: UNTESTED naming a refusal is silent", "RECO-UNRUN" in run(good_chk + hdr + row_u), False)
-    ck("NEGATIVE 0.3.28: TESTED never fires RECO-UNRUN", "RECO-UNRUN" in run(good_chk + hdr + row_t), False)
-    ck("POSITIVE: UNTESTED with no BLOCKED fires",
-       "RECO-RUN" in run(good_chk + hdr + "| 2 | i | a | Rob | UNTESTED: gap. | p | c |\n"), True)
     ck("POSITIVE: measured with no CHECKED command fires MEASURED-LABEL",
        "MEASURED-LABEL" in run("ROOT CAUSE: measured: it broke.\n" + hdr + row_t), True)
     ck("NEGATIVE: measured with a backtick command is silent",
@@ -273,16 +223,10 @@ def _selftest():
     ck("NEGATIVE: unmeasured/not measured does not trigger the label rule",
        "MEASURED-LABEL" in run("ROOT CAUSE: inferred, not measured.\n" + good_chk + hdr + row_t), False)
     sc = "SELF-CHECK: thorough: no - x; confidence: 7/10 in row 2, 4/10 in row 1, drops to 3 if y. BLOCKED: row 2 (Rob).\n"
-    ck("POSITIVE: 7/10 on an UNTESTED row fires CONF-TESTED", "CONF-TESTED" in run(sc + good_chk + hdr + row_t + row_u), True)
     sc2 = "SELF-CHECK: thorough: yes - x; confidence: 7/10 in row 1, 4/10 in row 2, drops to 3 if y.\n"
-    ck("NEGATIVE: 7/10 on a TESTED row is silent", "CONF-TESTED" in run(sc2 + good_chk + hdr + row_t + row_u), False)
     sc3 = "SELF-CHECK: thorough: yes - x; confidence: 6/10 in rows 1 to 2, drops to 3 if y.\n"
-    ck("POSITIVE: a range of rows is expanded", "CONF-TESTED" in run(sc3 + good_chk + hdr + row_t + row_u), True)
     sc4 = "SELF-CHECK: thorough: yes - x; confidence: 5/10 in rows 1 and 2, drops to 3 if y. BLOCKED: row 2 (Rob).\n"
-    ck("NEGATIVE: 5/10 never fires", "CONF-TESTED" in run(sc4 + good_chk + hdr + row_t + row_u), False)
     sc5 = "SELF-CHECK: thorough: yes - x; confidence: 5/10 in rows 1 to 2, 7/10 in row 3, drops to 3 if y. BLOCKED: row 2 (Rob).\n"
-    ck("POSITIVE: a later clause after a comma is still read",
-       "CONF-TESTED" in run(sc5 + good_chk + hdr + row_t + row_u + row_n), True)
     print("\n%d passed, %d failed" % (ok[0], ok[1]))
     return 1 if ok[1] else 0
 

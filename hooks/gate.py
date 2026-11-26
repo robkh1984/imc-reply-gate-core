@@ -372,7 +372,7 @@ def turn_key(entries):
     return "no-user-boundary"
 
 
-TABLE_HEADER_RE = re.compile(r"(?m)^[ \t]*\|\s*#\s*\|\s*Issue\s*/\s*Risk\s*\|\s*Action\s*\|\s*Owner\s*\|[^\n]*\n[ \t]*\|[ \t:|-]*---")
+TABLE_HEADER_RE = re.compile(r"(?m)^[ \t]*\|\s*(?:#\s*\|\s*Issue\s*/\s*Risk\s*\|\s*Action|ID\s*\|\s*Issue\s*/\s*Action)\s*\|\s*Owner\s*\|[^\n]*\n[ \t]*\|[ \t:|-]*---")  # O2: 6-column header too
 
 
 # 0.4.15 (OI-0811): a delivered SendUserMessage ending "TABLE UNCHANGED since the last reply." passed the PreToolUse gate
@@ -639,7 +639,7 @@ def rob_owns_work_fails(text):
         c = _cells(r)
         if len(c) < 4 or c[3].strip().lower() != "rob":
             continue
-        if not ROB_ASK_RE.search(c[2]):
+        if not ROB_ASK_RE.search(c[2]) and not (len(c) > 4 and re.match(r"^\s*\**\s*DECISION\s*:", c[4], re.I)):  # O2: a DECISION: row is an ask
             out.append(("ROB-OWNS-WORK", "row %s is owned by Rob but its Action asks him for no decision, approval, "
                         "upload, sign-in or physical act: '%s'. Investigate the root cause and fix it first; show Rob "
                         "only what needs him." % (c[0], c[2][:90])))
@@ -753,6 +753,8 @@ def claude_row_runnable_fails(text):
             continue
         if re.search(r"\bBLOCKED\b", " ".join(c[1:5])):
             continue
+        if len(c) > 4 and re.match(r"^\s*\**\s*(none|nothing\b|no change|n/?a|-|\u2014)\s*\**\s*\.?\s*$", c[4], re.I):
+            continue  # O2: a declared no-op row is not runnable work
         out.append(("CLAUDE-ROW-RUNNABLE", "row %s is owned by Claude ('%s'), so the work is runnable now and the reply stops with it undone. "
                     "Run it and report the result, or write BLOCKED: <the failed call or Rob's decision> in the row." % (c[0], c[2][:80])))
     return out
@@ -1457,6 +1459,16 @@ def main():
 
     if not text.strip():
         allow(mode, "empty reply", session=session, source=src)
+    # O2, core serial 23 (Rob 2026-11-26): every check reads the 6-column table through checker/sixcol.py; the
+    # stamp lookup, the sent-record and replycheck.py (which shims for itself) get the raw text Rob sees.
+    rawtext = text
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "checker"))
+        import sixcol as _sixcol
+        text = _sixcol.to_internal(rawtext)
+    except Exception as _e:
+        _sixcol = None
+        log(mode, "note", session=session, detail="sixcol shim unavailable: %s" % _e)
     if mode == "stop" and not table_info(text):  # 0.3.22: a no-table reply to a background wake-up is not gated
         try:
             if tp and wakeup_reply(read_entries(tp)):
@@ -1489,7 +1501,7 @@ def main():
             env["REPLYCHECK_EVERY_TABLE"] = "1"
         else:
             env.pop("REPLYCHECK_EVERY_TABLE", None)
-        p = subprocess.run([sys.executable, CHECKER], input=text, capture_output=True, text=True,
+        p = subprocess.run([sys.executable, CHECKER], input=rawtext, capture_output=True, text=True,
                            timeout=CHECK_TIMEOUT, cwd=os.path.dirname(CHECKER), env=env)
         if p.returncode not in (0, 1) or "Traceback" in p.stderr:
             log(mode, "note", session=session, detail="checker rc=%s stderr=%s" % (p.returncode, p.stderr[-400:]))
@@ -1535,7 +1547,7 @@ def main():
     precheck = None
     if table_info(text):
         try:
-            if prechecked(norm_sha(text)):
+            if prechecked(norm_sha(rawtext)):
                 precheck = "matched"
                 dropped = sorted({c for c, m in fails if fail_in_table(c, m, text)})
                 fails = [(c, m) for c, m in fails if not fail_in_table(c, m, text)]
@@ -1547,16 +1559,16 @@ def main():
                     fails.append(("PRECHECK-MISSING", "this message carries a next-steps table that checker/precheck.py "
                                   "has not stamped. NOTHING WAS SENT. Save the exact text as a draft file, have the "
                                   "independent reviewer read it, run python3 \"" + os.path.join(ROOT, "checker", "precheck.py") + "\" <draft>, "
-                                  "and send the stamped text unchanged." + first_diff_hint(text)))
+                                  "and send the stamped text unchanged." + first_diff_hint(rawtext)))
                 elif mode == "stop":
                     fails.append(("PRECHECK-MISSING", "the next-steps table in this reply was sent without a "
-                                  "precheck.py stamp for its exact text." + first_diff_hint(text)))
+                                  "precheck.py stamp for its exact text." + first_diff_hint(rawtext)))
         except Exception as e:
             log(mode, "note", session=session, detail="precheck lookup failed: %s" % e)
     # 0.3.18 CHANGE 2: Stop mode asks a stamp for a no-table reply longer than PROGRESS_MAX, as SendUserMessage does.
     if PLAIN_STAMP and mode == "stop" and not table_info(text) and len(text.strip()) > PROGRESS_MAX:
         try:
-            if not prechecked(norm_sha(text)):
+            if not prechecked(norm_sha(rawtext)):
                 fails.append(("PRECHECK-MISSING", "this reply is longer than %d characters, carries no table and has no checker/precheck.py stamp for its exact text." % PROGRESS_MAX))
         except Exception as e:
             log(mode, "note", session=session, detail="stop no-table stamp lookup failed: %s" % e)
@@ -1644,17 +1656,23 @@ def main():
     # stamped text can go out once per session (DUPLICATE-SEND), so a retype or a resend is refused before display.
     if is_send:
         try:
-            sha = norm_sha(text)
+            sha = norm_sha(rawtext)
             stamped = prechecked(sha)
             if PLAIN_STAMP and not table_info(text) and len(text.strip()) > PROGRESS_MAX and not stamped and not corr_waiver:
                 fails.append(("PRECHECK-MISSING", "this message is longer than %d characters and carries no stamp from "
                               "checker/precheck.py for its exact text. NOTHING WAS SENT. Save it as a draft, run "
-                              "precheck.py, and send the stamped text unchanged.%s" % (PROGRESS_MAX, first_diff_hint(text))))
+                              "precheck.py, and send the stamped text unchanged.%s" % (PROGRESS_MAX, first_diff_hint(rawtext))))
             if stamped and _already_sent(session, sha):
                 fails.append(("DUPLICATE-SEND", "this exact stamped text was already sent in this session. NOTHING WAS "
                               "SENT. Do not send it again; if it needs a change, change the draft, stamp it, send once."))
         except Exception as e:
             log(mode, "note", session=session, detail="send-path check failed: %s" % e)
+    if _sixcol is not None:  # O2: closing-block checks warn and log for 7 days (checker/demoted.txt)
+        try:
+            fails, _dem = _sixcol.split_demoted(fails)
+            _sixcol._log_demoted(_dem)
+        except Exception as e:
+            log(mode, "note", session=session, detail="demotion failed: %s" % e)
     try:
         w = waived()
     except Exception:
@@ -1663,7 +1681,7 @@ def main():
     codes_all = sorted({c for c, _ in fails})
     if not live and is_send and table_info(text):
         try:
-            _mark_sent(session, norm_sha(text))
+            _mark_sent(session, norm_sha(rawtext))
         except Exception:
             pass
     if not live:
@@ -1710,7 +1728,7 @@ def main():
                          "Rob has no table from this call. Do NOT send CORRECTION: lines in its place and never write "
                          "'the table above'. Fix the failures below in your draft file, run checker/precheck.py on the "
                          "draft, and send the whole message once, unchanged.%s Failures:\n"
-                         % (n, MAX_BLOCKS, first_diff_hint(text) if "PRECHECK-MISSING" in live_codes else ""))
+                         % (n, MAX_BLOCKS, first_diff_hint(rawtext) if "PRECHECK-MISSING" in live_codes else ""))
         for c, m in live:
             sys.stderr.write("FAIL  [%s] %s\n" % (c, m))
         sys.exit(2)
@@ -1748,7 +1766,7 @@ def main():
                          "THE BLOCKED TEXT IS ALREADY ON ROB'S SCREEN. Its next-steps table was sent without a "
                          "precheck.py stamp for the exact text (PRECHECK-MISSING). Do NOT resend the table. Send "
                          "no CORRECTION line after it; state at the top of your next reply that the table above was sent without its pre-check and was not re-verified as sent. Send every later table through SendUserMessage after "
-                         "precheck.py stamps it, unchanged.%s\n" % (n, MAX_BLOCKS, first_diff_hint(text)))
+                         "precheck.py stamps it, unchanged.%s\n" % (n, MAX_BLOCKS, first_diff_hint(rawtext)))
         sys.exit(2)
     if (tinfo and not involved) or (not tinfo and pending and not pend_involved):
         # 0.2.5: the block is about the prose only. The table already on Rob's screen passed.

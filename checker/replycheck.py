@@ -821,47 +821,11 @@ def check_nothing_left(text):
 _REC_ROW = re.compile(r"^\s*\|\s*\d+\s*\|(.+)\|\s*$", re.M)
 
 
-def check_untested_rec(text):
-    """REC-NOT-TESTED, Rob 2026-11-05 9:15 AM PST ('recommendations without testing them'). The 7-column table's
-    Recommendation cell (5th) must carry TESTED as its first label; a cell whose first label is UNTESTED, or with no label, is a recommendation
-    Rob said he does not want to see (10:03 PM PST 2026-11-04). Measured 2026-11-05: 15 UNTESTED and 5 unlabelled of
-    91 cells; 8 UNTESTED cells were sent after his ruling."""
-    for m in _REC_ROW.finditer(text):
-        cells = [c.strip() for c in m.group(1).split("|")]
-        if len(cells) != 6:                      # 7-column table: the number cell is outside the match
-            continue
-        rec = cells[3]
-        _lab = re.search(r"\b(UNTESTED|TESTED)\b", rec)
-        if _lab and _lab.group(1) == "TESTED":
-            continue
-        _enf = os.environ.get("REPLYCHECK_UNTESTED_ENFORCE") == "1" or datetime.datetime.now() >= datetime.datetime(2026, 11, 5, 10, 0)
-        (fail if _enf else warn)("REC-NOT-TESTED", "Recommendation cell is UNTESTED or unlabelled: %r. Run the test now (a dry run, a copy, a replay) and "
-             "begin the cell 'RECOMMEND: <what to do> TESTED (<call and result>)' - the advice first, then the run behind it (RECO-STATED, Rob 2026-11-22); if only Rob's approval or credential blocks the test, put the row under BLOCKED: and "
-             "recommend only after the test." % rec[:90])
-        return
+# check_untested_rec (REC-NOT-TESTED) and check_tested_hedge (REC-TESTED-HEDGE) were DELETED in core serial 23
+# (O2, Rob 2026-11-26): both judged a Recommendation cell by the word TESTED, and "the words TESTED or Tested: are
+# neither required nor sufficient, and no check may pass a cell because it contains them". Their text is in git
+# history at commit fc0c481. REC-NO-EVIDENCE (checker/sixcol.py) and the ledger reviewer judge the cell instead.
 
-
-
-# ---------- REC-TESTED-HEDGE (Rob 2026-11-09, Quorra table: 'TESTED: ... that is my general knowledge, not checked here') ----------
-_TESTED_HEDGE = re.compile(r"general knowledge|from memory|\bnot\s+(?:checked|tested|verified|measured)\s+here\b|"
-                           r"\bmy (?:own )?(?:judge?ment|inference|guess)\b|\bI (?:did not|have not|haven't) (?:test|check|verify|measure)\b", re.I)
-
-
-def check_tested_hedge(text):
-    """REC-TESTED-HEDGE. check_untested_rec only looks for the word TESTED anywhere in the Recommendation cell, so a cell that
-    begins TESTED and then says the recommendation itself was not checked passes. Fail it: the recommendation must rest on the
-    measured result, or the cell must be labelled UNTESTED and the row moved under BLOCKED:."""
-    for m in _REC_ROW.finditer(text):
-        cells = [c.strip() for c in m.group(1).split("|")]
-        if len(cells) != 6:
-            continue
-        rec = cells[3]
-        if re.search(r"\bTESTED\b", rec) and not re.search(r"\bUNTESTED\b", rec):
-            h = _TESTED_HEDGE.search(rec)
-            if h:
-                fail("REC-TESTED-HEDGE", "Recommendation cell says TESTED and also %r: %r. A cell cannot be both. Test the claim the "
-                     "recommendation rests on, or drop that claim from the recommendation." % (h.group(0), rec[:120]))
-                return
 
 # ---------- 4. FILLER ----------
 FILLER = [r"hope this helps", r"i.d be happy to", r"let me know if", r"feel free to",
@@ -3179,6 +3143,9 @@ def _file_sha(path):
 _PSR_SELF = re.compile(r"self-review|no independent reviewer", re.I)
 
 
+_NEWFMT = [False]  # O2: set by main() when the raw reply carries the 6-column table
+
+
 def check_presend_review(text):
     rows = _table_rows(text)
     decision = any(_is_open(r[2]) and _is_rob(r[3]) for r in rows)
@@ -3192,40 +3159,46 @@ def check_presend_review(text):
     if not (decision or full):
         return
     m = _PSR_LINE.search(text)
-    if not m:
+    # O2, core serial 23: the 6-column format has no PRE-SEND REVIEW line (Rob 2026-11-26, "No closing block"), but
+    # the review RECORD stays required - it carries the ledger reviewer's RECOMMENDATION-CHECK (REC-NOT-SUPPORTED).
+    # Record defects are coded REVIEW-RECORD and stay enforced; only the line checks (PRE-SEND-REVIEW) are demoted.
+    if not m and _NEWFMT[0]:
+        _tm = None
+    elif not m:
         fail("PRE-SEND-REVIEW",
              "this reply %s and carries no PRE-SEND REVIEW line. R078 and P6-14: an "
              "independent reviewer agent reads the draft first, and the reply states how many "
              "findings it returned and what was done with each."
              % ("asks Rob to decide something" if decision else "is a full reply"))
         return
-    body = m.group(1)
-    if full and _PSR_SELF.search(body):
+    body = m.group(1) if m else ""
+    if m:
+        _tm = _PSR_TEMPLATE.search(body)
+    if m and full and _PSR_SELF.search(body):
         fail("PRE-SEND-REVIEW",
              "the PRE-SEND REVIEW line is a self-review (%r). P6-14: a full reply is read by an "
              "independent reviewer agent before sending, because the author re-reading the author "
              "is how an overstated claim reached Rob on 2026-09-21." % body.strip()[:60])
         return
-    if _PSR_PLACEHOLDER.search(body):
+    if m and _PSR_PLACEHOLDER.search(body):
         fail("PRE-SEND-REVIEW",
              "the PRE-SEND REVIEW line is a placeholder (%r). A review that has not run is the "
              "exact skip R078 exists to make visible." % body.strip()[:60])
         return
-    if not _PSR_COUNT.search(body):
+    if m and not _PSR_COUNT.search(body):
         fail("PRE-SEND-REVIEW",
              "the PRE-SEND REVIEW line names no finding count. Say how many findings came back "
              "and what was done with each - fixed, cut, or disputed with a reason.")
         return
     # R120: meaning, not wording. See the note beside _PSR_SKIP.
-    _tm = _PSR_TEMPLATE.search(body)
-    if _PSR_SKIP.search(body) or _PSR_EVADE.search(body):
+    if m and (_PSR_SKIP.search(body) or _PSR_EVADE.search(body)):
         fail("PRE-SEND-REVIEW",
              "the PRE-SEND REVIEW line says the review did not run (%r). R120: saying so is not a "
              "substitute for running it - 43 to 48 of 135 gated replies passed that way. Run the "
              "independent reviewer on this draft, save its output beside the draft as <draft>.review "
              "with a 'DRAFT: <draft file name>' line (R120e), and report its findings." % (_PSR_SKIP.search(body) or _PSR_EVADE.search(body)).group(0))
         return
-    if not _tm:
+    if m and not _tm:
         fail("PRE-SEND-REVIEW",
              "the PRE-SEND REVIEW line does not say 'independent reviewer returned N findings'. "
              "R120b: that exact shape is required, because every looser shape was reworded around.")
@@ -3234,7 +3207,7 @@ def check_presend_review(text):
     _dp = _os.environ.get("REPLYCHECK_DRAFT")
     if _dp:
         if _dp == "-":
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "the draft came in on stdin, so there is no path beside which a review record can "
                  "sit. R120b: stamp a draft FILE; a review that cannot be located is not a review.")
             return
@@ -3242,7 +3215,7 @@ def check_presend_review(text):
         rt = open(rp, errors="ignore").read() if _os.path.isfile(rp) else ""
         fm = re.search(r"^\s*FINDINGS:\s*(\d+)", rt, re.M)
         if not fm:
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "no review record at %s with a 'FINDINGS: <n>' line (and, R120e, a 'DRAFT: <draft "
                  "file name>' line). R120: the reviewer's own "
                  "output is saved beside the draft, so a review line with nothing behind it fails "
@@ -3256,7 +3229,7 @@ def check_presend_review(text):
         _dn = _os.path.basename(_dp)
         _dl = re.search(r"^\s*DRAFT:\s*(\S.*?)\s*$", rt, re.M)
         if not _dl or _dl.group(1) != _dn:
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "the review record at %s %s. R120e, Rob approved 2026-10-06: the record carries a "
                  "line 'DRAFT: %s' naming the draft it reviewed, so a record copied from another "
                  "draft does not pass this one."
@@ -3270,13 +3243,13 @@ def check_presend_review(text):
         # (2) a kept copy <draft>.reviewed - the bytes the reviewer read - whose own sha256 equals it.
         _sl = re.search(r"^\s*DRAFT-SHA256:\s*([0-9a-f]{64})\s*$", rt, re.M)
         if not _sl:
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "the review record at %s has no 'DRAFT-SHA256: <64 hex>' line. R239 (Rob 2026-10-07): the "
                  "record names the sha256 of the draft it reviewed - the draft without its PRE-SEND REVIEW and "
                  "REPLYGATE lines, or a copy kept as %s.reviewed - and this gate recomputes it." % (rp, _dn))
             return
         if _sl.group(1) not in (review_draft_sha(_dp), _file_sha(_dp + ".reviewed")):
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "the review record at %s names DRAFT-SHA256 %s..., which is neither this draft (without its "
                  "PRE-SEND REVIEW and REPLYGATE lines) nor a kept %s.reviewed copy. R239: a record copied "
                  "from another draft, or a review of text that is not this draft, does not pass."
@@ -3290,20 +3263,20 @@ def check_presend_review(text):
                 if (_o.endswith(".review") and _os.path.abspath(_op) != _os.path.abspath(rp)
                         and _os.path.isfile(_op) and _os.path.getsize(_op) == len(_rb)
                         and open(_op, "rb").read() == _rb):
-                    fail("PRE-SEND-REVIEW",
+                    fail("REVIEW-RECORD",
                          "the review record at %s is byte-identical to %s. R120e, Rob approved "
                          "2026-10-06: a review is written for its own draft; a copied record is "
                          "not a review of this one." % (rp, _o))
                     return
         except OSError:
             pass
-        if fm.group(1) != _tm.group(1):
+        if _tm and fm.group(1) != _tm.group(1):
             fail("PRE-SEND-REVIEW",
                  "the reply says the reviewer returned %s findings and the review record says %s."
                  % (_tm.group(1), fm.group(1)))
             return
         if len(rt) < 400 or not re.search(r"^\s*VERIFIED:", rt, re.M):
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "the review record at %s is %d bytes with%s a VERIFIED: section. R120c: a one-line "
                  "'FINDINGS: 0' passed the previous version; a real review reports what it checked."
                  % (rp, len(rt), "" if re.search(r"^\s*VERIFIED:", rt, re.M) else "out"))
@@ -3312,11 +3285,19 @@ def check_presend_review(text):
         # padded the count (third reviewer, finding 8).
         _vm = re.search(r"^\s*VERIFIED:", rt, re.M)
         if len(re.findall(r"^\s*\d+\.\s", rt[:_vm.start()] if _vm else rt, re.M)) < int(fm.group(1)):
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "the review record claims %s findings but lists fewer numbered findings. A bare "
                  "'FINDINGS: 0' line was enough to pass the first version of this check."
                  % fm.group(1))
             return
+        # O2, core serial 23: with no PRE-SEND REVIEW line to account for each finding, a record whose findings are
+        # open against the EXACT text being stamped means known defects would be sent. Fix the draft (the record then
+        # matches the kept .reviewed copy) or re-review; the reviewer's findings, not a line about them, decide.
+        if _NEWFMT[0] and int(fm.group(1)) > 0 and _sl.group(1) == review_draft_sha(_dp):
+            fail("REVIEW-FINDINGS-OPEN",
+                 "the review record at %s lists %s finding(s) against this exact draft text. A reviewed defect is "
+                 "fixed before sending: change the draft, keep the reviewed bytes as %s.reviewed, and stamp again."
+                 % (rp, fm.group(1), _dn))
         # *** RECO-SUBSTANCE, 2026-11-22. THE HALF NO REGEX CAN DECIDE. ***
         # RECO-STATED (runbehind.py) can see that a Recommendation cell has an advice clause, that
         # the clause is not a CHECKED line and that it names an action. It cannot see whether the
@@ -3328,7 +3309,7 @@ def check_presend_review(text):
         # neither pretending to do the other's job.
         if NEXT_STEPS_HEADER.search(text) and not re.search(
                 r"^\s*RECOMMENDATION-CHECK:\s*(\S.{19,})", rt, re.M):
-            fail("PRE-SEND-REVIEW",
+            fail("REVIEW-RECORD",
                  "the review record at %s carries no 'RECOMMENDATION-CHECK: <verdict>' line. A table "
                  "went to the reviewer, so the reviewer says, in its own words, whether each "
                  "Recommendation cell actually recommends something or only reports a run. No regex "
@@ -6381,7 +6362,8 @@ def _selftest():
     def _psr(n):
         _os_st.environ["REPLYCHECK_DRAFT"] = str(_rd / n)
         try:
-            return "PRE-SEND-REVIEW" in run(_rtxt, [check_presend_review])
+            _r = run(_rtxt, [check_presend_review])
+            return "PRE-SEND-REVIEW" in _r or "REVIEW-RECORD" in _r  # O2: record defects now code REVIEW-RECORD
         finally:
             _os_st.environ.pop("REPLYCHECK_DRAFT", None)
     _prop("R120e CONTROL a record whose DRAFT line names its own draft passes", not _psr("a.md"))
@@ -7065,7 +7047,7 @@ check_commit_then_stop check_link_reuse check_link_resolves check_link_escapes
 PROSE_CHECKS = frozenset("""
 check_agreement check_deferred_work check_absence_claim check_not_run_claim
 check_rating_closable check_filler check_tool_deadend check_ends_on_intent check_done_claim
-check_untested_rec check_tested_hedge check_selfcheck_never_no check_voice check_opener
+check_selfcheck_never_no check_voice check_opener
 check_nothing_left check_prose_decision check_prose_count check_owner_pronoun
 check_skill_claim check_offload check_prediction
 """.split())
@@ -7128,6 +7110,19 @@ def main():
     if not text.strip():
         print("NOT CHECKED  empty input - nothing was linted, and this is NOT a pass")
         sys.exit(2)
+    # O2 (core serial 23, Rob 2026-11-26): a 6-column table is read through the sixcol shim, so every
+    # position-based check below sees the 7-column shape it was written for. Nothing here is hashed.
+    try:
+        import sixcol as _sixcol
+    except ImportError:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import sixcol as _sixcol
+    _raw_text = text
+    if _sixcol.has_old_table(_raw_text):
+        warn("TABLE-OLD-FORMAT", "this reply carries the retired 7-column table. Rob 2026-11-26 (O2): the table is "
+             "'" + _sixcol.NEW_HEADER_TEXT + "', with no closing block. Warn-only until " + _sixcol.DEMOTE_UNTIL + ".")
+    _NEWFMT[0] = _sixcol.has_new_table(_raw_text)
+    text = _sixcol.to_internal(text)
     claims, checked = check_claim_ledger(text)
     # CHECKED_RE matches the line START, so re-extract the full lines to compare against.
     _checked_lines = [ln for ln in text.splitlines() if CHECKED_RE.match(ln)]
@@ -7141,8 +7136,7 @@ def main():
     check_closed_inferred(text)       # CLOSED-ON-INFERRED-CAUSE, core serial 6 (OI-0789)
     check_ends_on_intent(text)        # ENDS-ON-INTENT, Rob 2026-11-05 (0.3.39)
     check_nothing_left(text)          # NOTHING-LEFT-CLAIM, Rob 2026-11-11 (0.3.47, R26)
-    check_untested_rec(text)          # REC-NOT-TESTED, Rob 2026-11-05 (0.3.41)
-    check_tested_hedge(text)          # REC-TESTED-HEDGE, Rob 2026-11-09
+    # REC-NOT-TESTED and REC-TESTED-HEDGE DELETED in core serial 23 (O2, Rob 2026-11-26); see the note where they stood.
     check_filler(text)
     check_prediction(text)
     check_open_row_link(text)
@@ -7248,6 +7242,9 @@ def main():
     WARNS[:] = [(c, m) for c, m in WARNS if c not in RETIRED]
     if _ret:
         INFO.append("RETIRED (R026, not gating): %s" % ", ".join(sorted(set(_ret))))
+    for _c, _m in _sixcol.evidence_fails(_raw_text) + _sixcol.table_last_fails(_raw_text):
+        fail(_c, _m)
+    _sixcol.demote(FAILS, WARNS)
     for m in INFO:
         print("INFO  " + m)
     for c, m in WARNS:

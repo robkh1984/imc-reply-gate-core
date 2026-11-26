@@ -132,6 +132,10 @@ def main(argv):
         return 2
     with open(draft, encoding="utf-8", errors="replace") as f:
         text = f.read()
+    sys.path.insert(0, HERE)
+    import sixcol as _sixcol  # O2, core serial 23: checks read the 6-column table through the shim; the stamp hashes the raw text
+    rawtext = text
+    text = _sixcol.to_internal(rawtext)
     fails = re.findall(r"^FAIL  \[([^\]]+)\] (.*)$", p.stdout, re.M) + gate._gap_fails(text)
     if hasattr(gate, "table_row_fails"):  # 0.4.11: the Stop hook's own list (OI-0805)
         fails += gate.table_row_fails(text)
@@ -211,7 +215,7 @@ def main(argv):
     # a draft carrying a character that looks like a space but is not one (U+00A0 and kin) cannot be
     # retyped into SendUserMessage exactly - measured: a typed U+00A0 arrives as U+0020 - so the stamp never
     # matches, the gate blocks, and the blocked text is still shown. Refuse it here, before the first send.
-    _bad = sorted({"U+%04X" % ord(ch) for ch in text if ch in UNTYPABLE})
+    _bad = sorted({"U+%04X" % ord(ch) for ch in rawtext if ch in UNTYPABLE})
     if _bad:
         fails.append(("UNTYPABLE", "the draft carries %s, which looks like a space but cannot be retyped "
                       "exactly into SendUserMessage, so the sent text would never match this stamp. Use "
@@ -234,6 +238,10 @@ def main(argv):
                 print("WARN  [PANEL-NOT-RUN] reviewpanel.py review returned rc=%d: %s" % (_pp.returncode, (_pp.stdout + _pp.stderr).strip()[:200]))
         except Exception as _e:
             print("WARN  [PANEL-NOT-RUN] reviewpanel.py review did not finish: %s" % str(_e)[:200])
+    fails, _demoted = _sixcol.split_demoted(fails)  # O2: closing-block checks warn and log for 7 days
+    for _c, _m in _demoted:
+        print("WARN  [DEMOTED:%s] %s" % (_c, _m))
+    _sixcol._log_demoted(_demoted)
     w = gate.waived() if os.path.isfile(gate.WAIVERS) else set()
     # 0.2.16 (Rob 2026-10-17, row 15; RC5): a waived code does not block, so it must not read as a FAIL. Print each
     # such line as WAIVED and correct the checker's own totals line. Unwaived FAIL lines are untouched.
@@ -273,7 +281,7 @@ def main(argv):
         except OSError:
             pass
         return 1
-    sha = gate.norm_sha(text)
+    sha = gate.norm_sha(rawtext)
     ts = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
     row = "%s\t%s\t%s%s\n" % (sha, ts, draft, "\tpanel=ran" if _panel_ran else "")
     # 0.4.7: a sandboxed Bash cannot write under ~/.claude; fall back to a per-user temp path the gate hooks also read.

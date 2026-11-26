@@ -1,0 +1,17 @@
+# O2, core serial 23 (Rob 2026-11-26): "turn every closing-block check into a warning that logs and does not block,
+# for 7 days" (until 2026-12-03). CODE<TAB>why it is a closing-block check. Read by checker/sixcol.py.
+SELFCHECK	the SELF-CHECK line (thorough / confidence N/10) is part of the retired closing block
+PRE-SEND-REVIEW	the PRE-SEND REVIEW line is part of the retired closing block; the review itself still runs (REC-NOT-SUPPORTED)
+TABLE-AFTER-REVIEW	places the PRE-SEND REVIEW line relative to the table
+REVIEW-FIX-APPLIED	parses the PRE-SEND REVIEW line's fixed-row counts
+OBJECTIVE-SECTIONS	requires the PROJECT OBJECTIVE / OBJECTIVE closing lines
+ROOTCAUSE	requires a CAUSE: label in every Claude row (Rob named CAUSE: among the old-format rules)
+ROOT-CAUSE	requires a ROOT CAUSE: closing line
+PREVENTS	requires a Prevents recurrence: label in the Action column, which the 6-column table no longer has
+MEASURED-LABEL	requires CHECKED: lines, part of the retired closing block
+ABOVE-TABLE-CAP	the 150-word prose cap Rob named among the old-format rules
+ABSENCE-CLAIM	its only remedy is a CHECKED: line; the ledger reviewer now checks claims against evidence.log
+NOT-RUN-CLAIM	its only remedy is a CHECKED: line; the ledger reviewer now checks claims against evidence.log
+SITE-FAULT	its only remedy is a CHECKED: line with a control; the ledger reviewer now checks claims against evidence.log
+SENT-CHECKED	requires a CHECKED: line quoting Rob's message, part of the retired closing block
+LEDGER-0	counts CHECKED: lines against system claims, part of the retired closing block
