@@ -375,6 +375,11 @@ def turn_key(entries):
 TABLE_HEADER_RE = re.compile(r"(?m)^[ \t]*\|\s*#\s*\|\s*Issue\s*/\s*Risk\s*\|\s*Action\s*\|\s*Owner\s*\|[^\n]*\n[ \t]*\|[ \t:|-]*---")
 
 
+# 0.4.15 (OI-0811): a delivered SendUserMessage ending "TABLE UNCHANGED since the last reply." passed the PreToolUse gate
+# only because an earlier stamped draft held a table, so it counts as this turn's table for the closing line.
+_UNCHANGED_SEND = re.compile(r"^TABLE UNCHANGED since (?:the last reply|\S+.*)$", re.M)
+
+
 def turn_sent_table(entries):
     """0.2.39: True when a SendUserMessage in this turn carried a real next-steps table (header line at the
     start of a line followed by the separator row, not a quoted header) AND was delivered (its tool_result is
@@ -396,7 +401,8 @@ def turn_sent_table(entries):
                 continue
             if (e.get("type") == "assistant" and b.get("type") == "tool_use"
                     and b.get("name", "").rsplit("__", 1)[-1] == "SendUserMessage"
-                    and TABLE_HEADER_RE.search(str((b.get("input") or {}).get("message", "")))):
+                    and (TABLE_HEADER_RE.search(str((b.get("input") or {}).get("message", "")))
+                         or _UNCHANGED_SEND.search(str((b.get("input") or {}).get("message", ""))))):
                 sent[b.get("id")] = True
             elif e.get("type") == "user" and b.get("type") == "tool_result" and b.get("tool_use_id") in sent:
                 body = json.dumps(b.get("content", ""))

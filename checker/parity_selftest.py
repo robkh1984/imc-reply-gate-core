@@ -28,4 +28,11 @@ open(stamps, "w").write("x\t1\t%s\nFAIL\t2\t%s\tX\ny\t3\t%s\n" % (a, b, b))
 t("Stop-side lookup skips the reply's own draft", bool(lc.tables(lc.previous_table_draft(un, None, stamps) or "")), True)
 open(stamps, "w").write("y\t3\t%s\n" % b)
 t("CONTROL: no earlier table, no pass", lc.previous_table_draft(un, None, stamps), None)
+def _turn(msg, result="Message delivered to user."):
+    return [{"type": "user", "message": {"content": "next steps?"}},
+            {"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "t1", "name": "SendUserMessage", "input": {"message": msg}}]}},
+            {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "t1", "content": result}]}}]
+t("OI-0811 delivered TABLE UNCHANGED counts as the turn's table", g.turn_sent_table(_turn("Short.\n\nTABLE UNCHANGED since the last reply.\n")), True)
+t("OI-0811 CONTROL: blocked TABLE UNCHANGED does not count", g.turn_sent_table(_turn("Short.\n\nTABLE UNCHANGED since the last reply.\n", "imc-reply-gate blocked this SendUserMessage. NOTHING WAS SENT")), False)
+t("OI-0811 CONTROL: a mention inside a sentence does not count", g.turn_sent_table(_turn("I wrote TABLE UNCHANGED since the last reply in prose.")), False)
 print("%d of %d ok" % (ok, tot)); sys.exit(0 if ok == tot else 1)

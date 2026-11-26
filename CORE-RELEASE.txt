@@ -1,1 +1,1 @@
-imc-reply-gate core serial 16 (0.4.14): REPEAT-TEXT no longer compares a draft with a FAIL stamp row, which is a draft that never passed and was never sent (OI-0809).
+imc-reply-gate core serial 17 (0.4.15): a delivered SendUserMessage ending TABLE UNCHANGED counts as the turn's table, so the closing line is not refused for EVERY-REPLY-TABLE (OI-0811).
