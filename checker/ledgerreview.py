@@ -7,6 +7,7 @@ every run claim against the session's evidence.log written by hooks/ledger.py.
 
     python3 ledgerreview.py <draft> --evidence <evidence.log> [--key <file>] [--model sonnet] [--turns 30] [--out <json>]
     python3 ledgerreview.py --print-prompt        the frozen brief, so its sha256 can be recorded before scoring
+    python3 ledgerreview.py --record <draft> <reviewer output file>   write <draft>.review and <draft>.reviewed (O2)
 
 How it runs: copies the draft and evidence.log into a fresh folder, writes ledger-verify.txt there (ledger.py verify),
 then runs  claude -p <brief> --model <model> --setting-sources project --max-turns <turns>  in that folder, with Read,
@@ -85,6 +86,24 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if a[:1] == ["--print-prompt"]:
         sys.stdout.write(brief()); sys.exit(0)
+    if a[:1] == ["--record"] and len(a) == 3:
+        # O2, core serial 24: write <draft>.review from the reviewer's saved output, with the DRAFT and DRAFT-SHA256
+        # lines the gate binds the record to (REVIEW-RECORD), so no session hashes or types them by hand.
+        draft, outp = a[1], a[2]
+        res = open(outp, encoding="utf-8", errors="replace").read().strip()
+        if findings_count(res) is None:
+            print("RECORD REFUSED: %s has no 'FINDINGS: <n>' line, so it is not a reviewer's output" % outp); sys.exit(2)
+        if not re.search(r"^\s*RECOMMENDATION-CHECK:", res, re.M) or not re.search(r"^\s*VERIFIED:", res, re.M):
+            print("RECORD REFUSED: the reviewer output lacks a RECOMMENDATION-CHECK: or a VERIFIED: line; re-brief it with --print-prompt"); sys.exit(2)
+        import hashlib
+        t = open(draft, encoding="utf-8", errors="replace").read()
+        keep = [l for l in t.split("\n") if not re.match(r"^\s*\*{0,2}PRE-SEND REVIEW\*{0,2}\s*:", l, re.I) and not l.startswith("REPLYGATE")]
+        sha = hashlib.sha256("\n".join(keep).encode("utf-8")).hexdigest()
+        rec = "DRAFT: %s\nDRAFT-SHA256: %s\n\n%s\n" % (os.path.basename(draft), sha, res)
+        open(draft + ".review", "w", encoding="utf-8").write(rec)
+        shutil.copyfile(draft, draft + ".reviewed")
+        print("RECORD WRITTEN %s.review (findings=%s, sha256 %s); the reviewed bytes are kept as %s.reviewed"
+              % (draft, findings_count(res), sha[:16], draft)); sys.exit(0)
     if not a or a[0].startswith("-") or "--evidence" not in a:
         print(__doc__); sys.exit(1)
     g = lambda k, dflt=None: a[a.index(k) + 1] if k in a else dflt

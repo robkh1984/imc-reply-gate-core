@@ -1,7 +1,7 @@
 {
  "files": {
   ".claude-plugin/plugin.json": "4a14b857d1b7fe4afd535646ab9717d9ec8ee1570483c84e1c3d67bad7c4626f",
-  "CORE-RELEASE.txt": "b74a2667cf260ff6aff695e7141b6534f0e526db28625ac75740ad8aa6b84594",
+  "CORE-RELEASE.txt": "5cd87df9dd59f49e3bf1c117e8a5cc5c68222b82e9e75f7cced680edba1bc34d",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -82,7 +82,7 @@
   "checker/fixtures_oi0808/help.md.review": "b03749580e32c2a645e4d855e9a8a540b0db1f1ba0b9eb703269fd3b0995c2cc",
   "checker/fixtures_oi0808/help.md.reviewed": "ec1e03451ac264eb1a503ca0ab3e5d43e1c1496ab4409f757659794db86d39f7",
   "checker/gate_state_selftest.py": "1ea3c3a51e17e4e3d8a5011994009026f90b74d1687d9407c8c85fe28786d960",
-  "checker/ledgerreview.py": "685b4dd0d0be518756b54a4765b71c678d882dfa473dcc2e9d1df71344b87756",
+  "checker/ledgerreview.py": "870d28b0aa42042d611c93d82bc47be2d2b894b41396b6248a0bda9928c34a80",
   "checker/lengthcheck.py": "d570d27afee583f67c5d134ac00c6cbf3b7efec8e59ca509c89e203e417ad8f5",
   "checker/lengthcheck_selftest.py": "7274d66d13b2e9a2de708fad09c78a1e65a4dfab264b8a6f4adbbf563ca32d14",
   "checker/livereadcheck.py": "c12064785a39669490845a188808ea5e08b5ea65153c02267072cf612aa4a0df",
@@ -119,7 +119,7 @@
   "hooks/agentguard.py": "0da9120884f7d1bff09ac4e33b39e05c5a8d6a62faf57fd048460a8f5ed86b4a",
   "hooks/approvalledger.py": "6ab384d2f80cbced14544d6d58056d2f7a350f465f0ece49fe14b01b1926478e",
   "hooks/editlogguard.py": "424ae9c878619ddbd3b64c093d29c9b072e00c02c5abf0f4292d25d093627262",
-  "hooks/gate.py": "239f683349b5838771e9daeb25a2fbf05b7acef11c7497e9275f30ce3ad7ebca",
+  "hooks/gate.py": "0607ce3e3f65c8808a694362106ce4fbeb7362ebc7271a71ab5610cbede403fd",
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
   "hooks/intakeguard.py": "45175977a622f0eebfdc6637c4fb86f7c8e971ba7cecbc68ac78bb1a34b1d2dc",
   "hooks/ledger.py": "7be41a66a5714cdad7a4efe7e7702e06112eef3d29d6be6198eea7523b1fd74f",
@@ -128,6 +128,6 @@
   "hooks/reviewer-rubric.txt": "b6f505965fd3ffd0f5a9a3107412954c21979a1ca75e1c6dbb981a388746bca7",
   "hooks/reviewpanel.py": "d330db1faa5d2355c2fa66fc863d21387142904966cac979913978be143548cc"
  },
- "serial": 23,
- "version": "0.4.21"
+ "serial": 24,
+ "version": "0.4.22"
 }
