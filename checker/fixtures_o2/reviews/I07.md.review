@@ -1,0 +1,15 @@
+DRAFT: I07.md
+DRAFT-SHA256: 0020435dab09e456f7d1aeb6a56a0754db41ce8a10010b5c923dc3a970c715f0
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.239, 14.4s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. Row 1 cites L1 and L3, which are real hook-written lines that ledger-verify.txt passes (18 lines, 0 bad). They show a run of the shim's selftest (11 of 11) and of the full core selftests (36 of 36), and a broken shim would have made them fail.
+
+- **Report sentence 1** ("passes all 11 of its controls… 36 of 36") matches L1 (`sixcol selftest pass=11 fail=0`) and L3 (`selftests pass=36 fail=0`).
+- **Row 1, Issue/Action cell** says the push returned HTTP 403, and L13 shows exactly that (`error: 403`, exit 128).
+- **Not confirmed:** I could not confirm from the logged command that `checker/sixcol.py` is the shim itself. Its name and its output (`same line count`, `header becomes internal`) are consistent with that, and the report does not contradict it.
+- **Not confirmed:** I could not confirm that the core selftest run (L3) covers the shim. The report only claims a clean run, and L3 shows one.
+- **Not re-run:** nothing could be re-run. The commands refer to `checker/`, `core/` and `/home/claude/o2/work`, none of which are in this folder.
+
+VERIFIED: evidence.log L1, L3, L13. I also opened ledger-verify.txt, which reports 18 lines and 0 bad.

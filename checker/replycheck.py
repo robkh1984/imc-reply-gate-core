@@ -702,7 +702,7 @@ def check_every_reply_table(text):
             pass
         fail("EVERY-REPLY-TABLE", "this reply carries no next-steps table; Rob's rule (2026-11-04 7:40 AM PST) is a table in every reply "
                                   "unless the reply has a line 'ALL OBJECTIVES DONE: <40+ characters naming the call and result>' and no open item "
-                                  "(header '| # | Issue / Risk | Action | Owner | Recommendation | Pros | Cons |').")
+                                  "(header '| ID | Issue/Action | Owner | Recommendation | Pros | Cons with Risks and Mitigations |', O2 2026-11-26).")
 
 
 # ---------- DONE-NO-CALL, 0.3.37 (Rob 2026-11-03 10:18 PM PST and 2026-11-04 7:41 PM PST pins R2: before saying DONE, fixed or
@@ -2204,8 +2204,8 @@ def check_table_shape(text):
         got = " | ".join(cells)
         fail("TABLE-SHAPE",
              "a ranked table is headed '%s'. SUMMARY-SPEC's live shape, ruled by Rob on "
-             "2026-10-04 and renamed 2026-10-15, is '# | Issue / Risk | Action | Owner | Recommendation | "
-             "Pros | Cons'. Width is solved by shortening cells, never by dropping one of his "
+             "2026-11-26 (O2), is 'ID | Issue/Action | Owner | Recommendation | "
+             "Pros | Cons with Risks and Mitigations'. Width is solved by shortening cells, never by dropping one of his "
              "fields." % got[:110])
 
 

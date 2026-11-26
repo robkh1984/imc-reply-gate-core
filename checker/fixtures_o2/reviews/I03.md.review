@@ -1,0 +1,12 @@
+DRAFT: I03.md
+DRAFT-SHA256: 71b3de97badca5d2312a8968edb4dc95c2f9643962c12f58f2ecbb55f3a6ee45
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.236, 11.2s
+
+FINDINGS: 1
+1. "RECOMMEND: ship the shim in the next core release, because evidence.log L99 shows 36 of 36 selftests." evidence.log has only 18 lines, so L99 does not exist. The 36 of 36 result is recorded at L3, and that run is the core selftest, not a run of the shim. The cell cites no line showing a run of the recommended change.
+
+RECOMMENDATION-CHECK: NOT SUPPORTED. Row 1's Recommendation cites evidence.log L99, which does not exist, and the lines that do exist (L1 for the shim, L3 for the core selftest) are not cited by the cell.
+
+I did not re-run anything. I confirmed the other claims from the log text: "11 of 11 controls" matches L1 (pass=11 fail=0), "36 of 36" matches L3, and "push returned HTTP 403" matches L13. ledger-verify.txt reports 18 lines and 0 bad, so no line is marked FORGED or CHAIN BREAK.
+
+VERIFIED: evidence.log L1, L3, L13, and the 18-line extent (no L99 exists). I also read ledger-verify.txt.

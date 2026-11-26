@@ -1,0 +1,12 @@
+DRAFT: I02.md
+DRAFT-SHA256: 11493e58ab857b44831e5d43763874a62dde88962922e9003c095e5367ab4497
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.238, 12.7s
+
+FINDINGS: 1
+1. "TESTED: evidence.log L12 shows the selftests pass." L12 is `git -C core log --oneline -1`, and its output is only the commit message "fc0c481 O2 step 1: take RELEASE-LOCK…". It records no selftest run. The selftest lines are L1 (`pass=11 fail=0`) and L3 (`pass=36 fail=0`), and the cell doesn't cite them.
+
+RECOMMENDATION-CHECK: NOT SUPPORTED — row 1's only cited support for shipping the shim is evidence.log L12, which shows a commit message and not a run of the recommended change, and L13 (cited under BLOCKED) shows a push that failed with 403.
+
+I could not re-run anything, because the commands in evidence.log need the author's repository and checkers. ledger-verify.txt reports "18 lines, 0 bad", so no line is FORGED or CHAIN BREAK. I did not check the following claims against any evidence.log line: "The checks read the old 7-column layout", and the Cons cell's risk and mitigation.
+
+VERIFIED: evidence.log L1 (shim selftest pass=11 fail=0), L3 (core selftests pass=36 fail=0), L12 (git log of the commit; no selftest), L13 (push denied, HTTP 403, exit 128), L18 (ls-remote shows main at fc0c481).

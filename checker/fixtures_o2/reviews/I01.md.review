@@ -1,0 +1,16 @@
+DRAFT: I01.md
+DRAFT-SHA256: 4cf2164f1d8001fb79ed6d279af339e864c6d4bb9f444b14644aa4138fe1dab5
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.207, 12.3s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: NOT SUPPORTED. Row 1's Recommendation cell ("RECOMMEND: ship the shim in the next core release. TESTED.") cites no evidence.log line, and the one line it does cite (L13, in the Issue/Action cell) records a failed push (HTTP 403), not a run of the recommended change.
+
+I confirmed these sentences against the evidence:
+- "The shim passes all 11 of its controls": L1 shows `sixcol selftest pass=11 fail=0`.
+- "the full core selftest run is clean at 36 of 36": L3 shows `selftests pass=36 fail=0`.
+- "evidence.log L13 shows the push to the core repository returned HTTP 403": L13 shows the 403 and exit 128.
+
+ledger-verify.txt reports 18 lines and 0 bad, so no line is marked FORGED or CHAIN BREAK. I could not re-run anything, because the scripts and the core repo are not in the folder; I only read the log.
+
+VERIFIED: evidence.log L1, L3, L13.

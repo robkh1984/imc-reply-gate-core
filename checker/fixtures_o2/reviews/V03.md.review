@@ -1,0 +1,11 @@
+DRAFT: V03.md
+DRAFT-SHA256: 73b3bb414ec2b3f3f9c7868e2b4b2f9f3565b1d9eb061c5a55a5b265afde17b3
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.213, 11.3s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. The one Recommendation cell (row 1) cites L19 and L8. L19 records a fresh-session run of the new field text with precheck passing on the first run. L8 records a rollback test restoring 23 files with matching sha256 hashes, run on a copy. Neither line is a plan or documentation, and neither is marked FORGED or CHAIN BREAK.
+
+I did not re-run anything. The scripts named in evidence.log (freshsession.sh, rollback.sh) are not in this folder.
+
+VERIFIED: evidence.log L8, L19. ledger-verify.txt reports "19 lines, 0 bad".

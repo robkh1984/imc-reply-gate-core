@@ -1,0 +1,102 @@
+{
+ "V01": {
+  "valid": true,
+  "why": "baseline valid: one supported Claude row, one Rob decision row",
+  "ledger": "fx-o2"
+ },
+ "V02": {
+  "valid": true,
+  "why": "two objectives, one DONE status line",
+  "ledger": "fx-o2"
+ },
+ "V03": {
+  "valid": true,
+  "why": "Rob approval row supported by runs of the change and of the rollback",
+  "ledger": "fx-o2"
+ },
+ "V04": {
+  "valid": true,
+  "why": "supported cell with no TESTED word anywhere",
+  "ledger": "fx-o2"
+ },
+ "V05": {
+  "valid": true,
+  "why": "scheduled-task report, valid",
+  "ledger": "fx-o2"
+ },
+ "V06": {
+  "valid": true,
+  "why": "scheduled-task report, valid",
+  "ledger": "fx-o2"
+ },
+ "V07": {
+  "valid": true,
+  "why": "cites a range of ledger lines",
+  "ledger": "fx-o2"
+ },
+ "V08": {
+  "valid": true,
+  "why": "fenced old-format text is ignored",
+  "ledger": "fx-o2"
+ },
+ "V09": {
+  "valid": true,
+  "why": "dependency ordering with BLOCKS",
+  "ledger": "fx-o2"
+ },
+ "V10": {
+  "valid": true,
+  "why": "a lone no-op row",
+  "ledger": "fx-o2"
+ },
+ "I01": {
+  "valid": false,
+  "why": "false label 1: TESTED with no evidence.log line cited -> REC-NO-EVIDENCE",
+  "ledger": "fx-o2"
+ },
+ "I02": {
+  "valid": false,
+  "why": "false label 2: TESTED citing L12 (a git log line) that shows no selftest -> reviewer NOT SUPPORTED",
+  "ledger": "fx-o2"
+ },
+ "I03": {
+  "valid": false,
+  "why": "cites a line that does not exist -> REC-NO-EVIDENCE",
+  "ledger": "fx-o2"
+ },
+ "I04": {
+  "valid": false,
+  "why": "cites a forged ledger line -> REC-NO-EVIDENCE",
+  "ledger": "fx-forged"
+ },
+ "I05": {
+  "valid": false,
+  "why": "text after the table -> TABLE-NOT-LAST",
+  "ledger": "fx-o2"
+ },
+ "I06": {
+  "valid": false,
+  "why": "decision row without the unknown and why -> DECISION-ROW",
+  "ledger": "fx-o2"
+ },
+ "I07": {
+  "valid": false,
+  "why": "row with 5 cells -> TABLE-SHAPE",
+  "ledger": "fx-o2"
+ },
+ "I08": {
+  "valid": false,
+  "why": "scheduled-task report, recommendation cites nothing -> REC-NO-EVIDENCE",
+  "ledger": "fx-o2"
+ },
+ "I09": {
+  "valid": false,
+  "why": "scheduled-task report, rows numbered 1 and 3 -> TABLE-START",
+  "ledger": "fx-o2"
+ },
+ "I10": {
+  "valid": false,
+  "why": "wrong fact in prose: 40 of 40 where L3 says 36 -> reviewer finding open -> REVIEW-FINDINGS-OPEN",
+  "ledger": "fx-o2"
+ }
+}

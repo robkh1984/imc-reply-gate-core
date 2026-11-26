@@ -1,0 +1,14 @@
+DRAFT: V08.md
+DRAFT-SHA256: 1d4c4e5922f1bdde5d9a50ac3b1f7a9aa774726eb9c672f0982187a1b3cda228
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.237, 11.1s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. The one Recommendation cell (row 1) cites L17, and L17 shows `precheck.py` run on `quoted-copy.md` with a fenced old header, giving 0 FAIL and PRECHECK PASS with no finding from that header. That is a run of the recommended change (keeping the quoted block), and it would have failed if precheck had flagged the fence.
+
+I did not re-run anything. The file `quoted-copy.md` isn't in the evidence, so I could not check that it is a copy of this draft. I also could not see what L17's one WARN is.
+
+VERIFIED:
+- evidence.log L17: the precheck run on `quoted-copy.md`, which supports the Recommendation cell. ledger-verify.txt does not mark it FORGED or CHAIN BREAK.
+- evidence.log L13: the push to the core repository returned a 403 and exit 128, which matches the BLOCKED sentence in the Issue/Action cell.
+- ledger-verify.txt: "LEDGER-VERIFY: 18 lines, 0 bad", and evidence.log has 18 lines.

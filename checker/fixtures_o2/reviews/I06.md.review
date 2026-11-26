@@ -1,0 +1,15 @@
+DRAFT: I06.md
+DRAFT-SHA256: a26fe5d5fe6f4102673e8d40db25c0a68abd977073f29c7adae5ccdddd2e333d
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.234, 12.6s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: NOT SUPPORTED. Row 1's Recommendation, "DECISION: restore them or not.", does not say what is unknown or why it cannot be measured, and the DECISION rule requires both. It cites no evidence.log line, and I found no line that measures the closing-block checks.
+
+I confirmed both result claims in the opening sentence:
+- **"All 11 controls":** L1 shows `sixcol selftest pass=11 fail=0`. evidence.log never uses the word "shim", so tying sixcol to the shim is an inference, not something the log states.
+- **"36 of 36":** L3 shows `selftests pass=36 fail=0`.
+
+ledger-verify.txt reports `18 lines, 0 bad`, so no line is FORGED or a CHAIN BREAK. I did not re-run anything, because the commands in the log refer to files that aren't in this folder (only I06.md, evidence.log and ledger-verify.txt are here).
+
+VERIFIED: evidence.log L1 and L3 were opened and checked against the report. I also read the whole of evidence.log (L1–L18) and ledger-verify.txt.

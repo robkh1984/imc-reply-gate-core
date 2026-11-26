@@ -1,0 +1,17 @@
+DRAFT: V07.md
+DRAFT-SHA256: 669fa156f8382035dea8ab1b4f14d5ba27104218a60121fd5a8a364767d997d2
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.237, 13.0s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. The only recommendation cell (row 1, "keep checker/sixcol.py in the tree") cites evidence.log L1-L3. Those lines, as the hook wrote them, show the file's own selftest at pass=11 fail=0, the runbehind selftest at 16 passed 0 failed, and the whole suite at pass=36 fail=0. ledger-verify.txt reports "18 lines, 0 bad", so none of the cited lines is marked FORGED or CHAIN BREAK.
+
+Two limits on that verdict:
+- I did not re-run the selftests, because checker/sixcol.py and the other scripts are not in this folder.
+- The mitigation in the Cons cell (re-point every check that reads both cells) is a plan, not a recommendation, so it needs no evidence line.
+
+The remaining claim sentences also hold:
+- "The checker/sixcol.py selftest, the runbehind selftest and the full suite all came back clean" matches L1-L3.
+- "BLOCKED: evidence.log L13 shows the push to the core repository returned HTTP 403" matches L13, which shows the 403 and exit 128.
+
+VERIFIED: evidence.log L1, L2, L3, L13. I also read L11 and L12. I did not need them, but the ledger-verify.txt result covers all 18 lines.

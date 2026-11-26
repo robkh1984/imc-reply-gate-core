@@ -1,0 +1,15 @@
+DRAFT: I05.md
+DRAFT-SHA256: b58d907653ebee4abc7e065b1c5502e24354cf0be9100e7113bb608d872ab088
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.231, 13.0s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. Row 1 cites L1 and L3, and L1 is a selftest of the shim itself (`sixcol.py --selftest`, pass=11 fail=0), so it is a run of the recommended change.
+
+- **Row 1 and L3:** L3 is a core-wide selftest run, 36 of 36, and I could not confirm from the log that it exercises the shim. The row passes on L1 alone, and L3 only backs the 36-of-36 figure.
+- **Row 1 and L13:** the "BLOCKED" statement is accurate. L13 shows the push returned 403.
+- **Not re-run:** `sixcol.py` and the other scripts named in the log are not in the folder, so I could not re-run any of them.
+
+`ledger-verify.txt` reports 18 lines and 0 bad, with no FORGED or CHAIN BREAK lines. L11's "10 lines, 0 bad" matches the 10 lines written before it.
+
+VERIFIED: evidence.log L1, L3, L13 (all cited by the draft). I also read L11 and the rest of the log to cross-check.

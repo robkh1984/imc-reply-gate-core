@@ -870,9 +870,10 @@ def first_diff_hint(text):
 
 SESSION_POINTER = (
     "IMC-REPLY-GATE (SessionStart, source=%s). A pointer, not the rules: a reply that asks Rob to decide carries ONE "
-    "next-steps table, sent last, under the header\n"
-    "| # | Issue / Risk | Action | Owner | Recommendation | Pros | Cons |\n"
-    "Before sending it: write the draft to a file, have an independent reviewer read that file, run "
+    "next-steps table, sent last, with no closing block (O2, Rob 2026-11-26), under the header\n"
+    "| ID | Issue/Action | Owner | Recommendation | Pros | Cons with Risks and Mitigations |\n"
+    "Every Recommendation cell cites the evidence.log lines that prove it (evidence.log L12); one that cannot be measured "
+    "is a Rob row opening DECISION: that says what is unknown and why. Before sending it: write the draft to a file, have an independent reviewer read that file, run "
     "python3 %s/checker/precheck.py <draft>, and send the stamped text unchanged. The gate refuses any difference "
     "and names the first differing character. Do not rebuild a table from a compacted summary: re-read the newest "
     "NEXT-STEPS document in the project. Stop only when a decision of Rob's is waiting. The five objectives are the "

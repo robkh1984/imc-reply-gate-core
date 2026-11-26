@@ -1,0 +1,14 @@
+DRAFT: I09.md
+DRAFT-SHA256: d14393bcb75ae4e9bc306c312cfdfae465c3503507492ed7d90648d00e79a0c5
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.230, 11.6s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. Both rows recommend keeping the status quo, and each cited line (L16 for row 1, L4 for row 3) exists and shows what the cell says it shows.
+
+- **Row 1:** The cell recommends leaving the release to the lock holder. evidence.log L16 shows `releaselock.check` returning `(2, 'RELEASE FREEZE: holder is 1a7546c7; this session may not push')` for another session. The BLOCKED clause cites L13, which does show the 403 on the push.
+- **Row 3:** The cell recommends keeping the ceiling at 450. evidence.log L4 shows `files=412 ceiling=450 OK` with exit 0. The BLOCKED clause cites L13 again, which is the same 403 push.
+- **Other checks:** The opening line says two findings, and the table has two rows. ledger-verify.txt reports "18 lines, 0 bad". No FORGED or CHAIN BREAK marks appear on L4, L13 or L16.
+- **Not re-run:** I did not recompute the `mac=` values myself, since I don't have the hook's key. I relied on ledger-verify.txt for that. I also did not re-run the scripts the lines record.
+
+VERIFIED: evidence.log L4, L13, L16. ledger-verify.txt was also read. L11 was read as well; it is a hook self-check ("10 lines, 0 bad") that the report does not cite.

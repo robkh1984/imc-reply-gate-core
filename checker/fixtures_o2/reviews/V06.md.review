@@ -1,0 +1,17 @@
+DRAFT: V06.md
+DRAFT-SHA256: 9656b741271a0f54eb08e87b7adcf3ca69214f67339533fc18c447177f2d90ef
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.238, 12.8s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED, because row 1's only Recommendation cell cites evidence.log L16, which shows the lock check refusing a push from `other-session`, and ledger-verify.txt reports 18 lines with 0 bad.
+
+- **Row 1:** The recommendation is to leave the release to the holder, which is close to a no-change recommendation. L16 is a run of the check, and it would have returned an allow result if the recommendation were wrong. L13 is cited only for the 403, and the line does show that the push returned HTTP 403.
+- **Not re-run:** I did not re-run the hook, `releaselock.check` or the git push. The environment doesn't have them, and I could not confirm the MACs independently. I relied on ledger-verify.txt for chain integrity.
+
+VERIFIED:
+- evidence.log L13: the push to `core` origin returned 403, exit 128.
+- evidence.log L16: `releaselock.check('Bash', 'git push origin main', 'other-session')` returned `(2, 'RELEASE FREEZE: holder is 1a7546c7; this session may not push')`.
+- evidence.log L5: the lock holder is `1a7546c7`, consistent with L16.
+- evidence.log L11: the ledger verified 10 lines at that point, consistent with the 18-line verification now.
+- evidence.log L12: the commit message names holder `1a7546c7`, consistent with L5 and L16.

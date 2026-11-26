@@ -1,0 +1,15 @@
+DRAFT: V05.md
+DRAFT-SHA256: ebc03abdee7bf7b2a17ff0f25918734cb0ae99027d1c3a5f533915123f7916d4
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.243, 16.0s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED, because row 1's only recommendation (hand the record to 2 TRIAGE) cites evidence.log L15, which shows a triage dry run on that record parsing 2 prompts with 0 errors. That run would have failed if the record were unparseable.
+
+I couldn't re-run anything, because the scripts named in evidence.log aren't in this folder. I also couldn't recompute the per-line `mac` values myself, so I relied on ledger-verify.txt. It reports 18 lines, 0 bad, with no FORGED or CHAIN BREAK marks.
+
+The first sentence says the record "verifies clean". L11 matches that: it verified 10 lines with 0 bad, and L1 to L10 are the 10 lines before it.
+
+I read "BLOCKS: none" together with "BLOCKED: evidence.log L13 shows the push … returned HTTP 403" as consistent. The failed push is not the hand-off to triage.
+
+VERIFIED: evidence.log L11, L13, L15. I also read the rest of the file (L1–L10, L12, L14, L16–L18) for context and contradictions. None of those lines is cited by V05.md, and none contradicts it.

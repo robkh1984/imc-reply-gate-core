@@ -1,0 +1,17 @@
+DRAFT: V01.md
+DRAFT-SHA256: 6ba50eb39db2574da4e192e1e685545fde87e4931ebd5ef19b73f788cd27696c
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.239, 15.4s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. Row 1 cites evidence.log L1 and L3. L1 is the shim's own selftest (`sixcol.py --selftest`, pass=11 fail=0) and L3 is the core selftest run (pass=36 fail=0). Row 2 is a DECISION row that names the unknown and why it can't be measured yet, and no evidence.log line measures demotion catch rates.
+
+Checks on the report's claims:
+- "11 of 11 shim controls" matches L1 (pass=11 fail=0).
+- "36 of 36 selftests" matches L3 (pass=36 fail=0).
+- "push to the core repository returned HTTP 403" matches L13 (error 403, exit 128).
+- ledger-verify.txt reports 18 lines, 0 bad, so no cited line is FORGED or a CHAIN BREAK. evidence.log has 18 lines.
+
+I could not re-run anything. `checker/sixcol.py` and `runselftests.sh` are not in the review folder, so I relied on the hook-written lines.
+
+VERIFIED: evidence.log L1, L3, L13. I also read L11, L18 and the rest of the log to check for lines that measure demotion catch rates, and found none.

@@ -180,6 +180,8 @@ def evidence_log_path():
 def _ledger():
     import importlib.util
     lp = _os.path.join(_os.path.dirname(HERE), "hooks", "ledger.py")
+    if not _os.path.isfile(lp):  # the portable checker folder is flat: ledger.py sits beside this file
+        lp = _os.path.join(HERE, "ledger.py")
     spec = importlib.util.spec_from_file_location("imc_ledger_sixcol", lp)
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)

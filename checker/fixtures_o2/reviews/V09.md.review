@@ -1,0 +1,14 @@
+DRAFT: V09.md
+DRAFT-SHA256: 3afc97efadb57c99c4047897761e0edfab25aa83fe322625920f3afc35eb0234
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.233, 13.5s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED, because rows 1 and 2 each cite an evidence.log line that records a run of the recommended check, and ledger-verify.txt marks neither line FORGED or CHAIN BREAK.
+- **Row 1:** L8 records `rollback.sh --test /tmp/rbcopy` restoring 23 files on a copy, with every sha256 matching its backup. A wrong rollback would have failed the hash check.
+- **Row 2:** L9 records `runfx.py work` printing "FIXTURES: 20 of 20 correct". A misclassification would have shown as a lower count.
+- **Both rows:** the "BLOCKED" sentence matches L13, which shows the push returning HTTP 403.
+
+I could not re-run anything. The scripts (`rollback.sh`, `runfx.py`) and the `/tmp/rbcopy` copy are not in the review folder. I took the two results from the hook-written log, and ledger-verify.txt reports 18 lines, 0 bad. I did not check whether the 20 fixtures overlap the data the classifier was tuned on, because evidence.log does not record that.
+
+VERIFIED: evidence.log L8, L9, L13. I also read L11 and L12 for context; the report does not cite them.

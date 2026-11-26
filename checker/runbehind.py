@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """runbehind.py - a recommendation, a "measured" label and a high confidence each need a run behind them.
 
-Built 2026-10-29 for the three rows Rob approved at 14:09 PDT:
-  RECO-RUN       every table row's Recommendation cell carries TESTED or UNTESTED. TESTED needs a CHECKED
-                 line in the same reply that has a time and a result arrow or exit code. UNTESTED needs a
-                 BLOCKED marker in the cell or in the reply.
-  MEASURED-LABEL a ROOT CAUSE / CAUSE / SELF-CHECK line that says "measured" needs a CHECKED line in the same
-                 reply that names a command, and a CHECKED line that names no command is refused.
-  CONF-TESTED    a SELF-CHECK confidence above 5/10 for a row needs that row's Recommendation to say TESTED
-                 (not UNTESTED).
+Built 2026-10-29 for the three rows Rob approved at 14:09 PDT. RECO-RUN and CONF-TESTED were DELETED in core serial
+23 (O2, Rob 2026-11-26): they judged a cell by the words TESTED / UNTESTED, which "are neither required nor sufficient".
+What remains:
+  RECO-STATED    a Recommendation cell states advice: 'RECOMMEND: <what to do>' (20+ characters, an action), or
+                 'NO RECOMMENDATION: <why>', a no-op, or a Rob 'DECISION:' row. The evidence that follows the advice
+                 ("because evidence.log L4 shows ...") is judged by sixcol.evidence_fails and the ledger reviewer.
+  MEASURED-LABEL a ROOT CAUSE / CAUSE / SELF-CHECK line that says "measured" needs a CHECKED line naming a command
+                 (warn-only until 2026-12-03: checker/demoted.txt).
 
 What it does NOT prove: that the cited run happened. It proves the reply cites one, in a form a reader can
 check. Entry point: check(text, fail, warn). Self-test: python3 runbehind.py --selftest.
@@ -126,7 +126,7 @@ def check(text, fail, warn):
         clause = m.group(1).strip()
         # O2, core serial 23: in the 6-column table the evidence rides in the same cell after the advice
         # ("RECOMMEND: keep X, because evidence.log L4 shows ..."); only the advice part is judged here.
-        clause = re.split(r"(?i)\bbecause\s+evidence\.log\b|[,;]?\s*evidence\.log\b", clause, 1)[0].strip().rstrip(",;")
+        clause = re.split(r"(?i)\bbecause\s+evidence\.log\b|[,;]?\s*evidence\.log\b", clause, maxsplit=1)[0].strip().rstrip(",;")
         if len(clause) < 20:
             fail("RECO-STATED", "row %d's RECOMMEND clause is %d characters - too thin to be advice. "
                  "Say what to do and why, in at least 20 characters. Clause: '%s'" % (n, len(clause), clause[:40]))

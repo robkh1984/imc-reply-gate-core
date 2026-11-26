@@ -1,0 +1,15 @@
+DRAFT: V04.md
+DRAFT-SHA256: 178a6c4b358fbfe6421350f867ecb5a34d892befbe209cb8a8b3bd146201542d
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.236, 13.1s
+
+FINDINGS: 0
+
+RECOMMENDATION-CHECK: SUPPORTED. The only Recommendation cell (row 1) cites L14, which records the edit run on scratch copies of both files, with `cmp` exit 0 and the new header counted once in each.
+
+- **L13:** the push to the core repository returned a 403, as row 1 states.
+- **L14:** it records `editpair.sh` applying the closing-text edit to `/tmp/pair/a/SKILL.md` and `/tmp/pair/b/SKILL.md`, then `cmp exit 0` and `grep -c 'Cons with Risks and Mitigations' -> 1 and 1`. That is a run of the recommended change on copies, and it would have failed had the edits diverged. It supports the opening sentence ("left the two copies identical") and the "each with the new header once" claim.
+- **Ledger check:** `ledger-verify.txt` reports 18 lines, 0 bad, which matches the 18 lines in `evidence.log`. No cited line is marked FORGED or CHAIN BREAK.
+
+Not re-run: I could not re-run `editpair.sh`, since the scratch copies in `/tmp/pair` are not in this folder. I also could not independently check the hook's `mac=` values, because I don't have its key. I relied on `ledger-verify.txt` for that.
+
+VERIFIED: evidence.log L13, L14. I read the whole log and opened no other line to confirm a claim.

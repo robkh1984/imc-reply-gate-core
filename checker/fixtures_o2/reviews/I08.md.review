@@ -1,0 +1,16 @@
+DRAFT: I08.md
+DRAFT-SHA256: 5020251322112766298a790a57b51110a0b3c676981eaa34d39973d405752a18
+REVIEWER: checker/ledgerreview.py sonnet, cost $0.229, 12.4s
+
+FINDINGS: 2
+1. "tested on the sheet." No line in evidence.log records a test on a sheet. The nearest entries, L15 (`triage.py --dry-run`) and L9 (`runfx.py`, fixtures), don't show filing anything under Review. This is a claimed test with no record (c).
+2. "TRIAGE run for 2026-11-26: two prompts were filed." The only triage run, L15, is a `--dry-run` that "2 prompts parsed from the record, 0 errors", so nothing was filed. The row itself says it is BLOCKED, and L13 shows the push returning 403. No line records a filing (c).
+
+RECOMMENDATION-CHECK: NOT SUPPORTED. Row 1's Recommendation cell ("RECOMMEND: file both prompts under Review in the library; tested on the sheet.") cites no evidence.log line, and L15 is only a dry-run parse, not a run of the filing change itself.
+
+VERIFIED:
+- I opened all 18 lines of evidence.log.
+- L13 confirms the 403 on the push, so the BLOCKED statement in the Issue cell is true.
+- L15 is the only triage record, and it is a dry-run.
+- ledger-verify.txt reports "18 lines, 0 bad", so none of these lines is marked FORGED or CHAIN BREAK.
+- I did not re-run any command, because the evidence refers to scripts and repositories that aren't in this folder.
