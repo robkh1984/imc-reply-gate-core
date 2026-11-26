@@ -48,8 +48,15 @@ expect("oi495-an-unclosed-fence-masks-to-the-end",
        codes(L.length_fails("quote:\n\n```\n" + words(400), "d.md", prev="")), [])
 expect("oi495-a-tilde-fence-masks-too",
        codes(L.length_fails("quote:\n\n~~~\n" + words(400) + "\n~~~\n\n" + tbl("a"), "d.md", prev="")), [])
+import tempfile as _tf
+_d = _tf.mkdtemp(); _sent = os.path.join(_d, "sent.md"); _failed = os.path.join(_d, "failed.md"); _st = os.path.join(_d, "st.tsv")
+open(_sent, "w").write("sent text"); open(_failed, "w").write("failed text")
+open(_st, "w").write("x\t1\t%s\nFAIL\t2\t%s\tPRE-SEND-REVIEW\n" % (_sent, _failed))
+expect("oi809-a-FAIL-row-is-not-the-last-stamped-draft", [L.previous_draft(os.path.join(_d, "new.md"), _st)], ["sent text"])
+open(_st, "w").write("FAIL\t2\t%s\tX\n" % _failed)
+expect("oi809-CONTROL-only-FAIL-rows-give-none", [L.previous_draft(os.path.join(_d, "new.md"), _st)], [None])
 os.environ["IMC_ALLOW_RESEND"] = "1"
 expect("override", codes(L.length_fails("hi\n\n" + tbl("a"), "d.md", prev="x\n\n" + tbl("a"))), [])
 if miss:
     print("LENGTHCHECK SELFTEST FAIL\n" + "\n".join(miss)); sys.exit(1)
-print("LENGTHCHECK SELFTEST PASS 22 cases"); 
+print("LENGTHCHECK SELFTEST PASS 24 cases"); 

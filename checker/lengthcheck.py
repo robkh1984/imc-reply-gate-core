@@ -86,7 +86,8 @@ def previous_draft(draft_path, stamps=STAMPS):
         return None
     for ln in reversed(open(stamps, encoding="utf-8", errors="replace").read().splitlines()):
         parts = ln.split("\t")
-        if len(parts) >= 3 and os.path.abspath(parts[2]) != os.path.abspath(draft_path) and os.path.isfile(parts[2]):
+        # 0.4.14 (OI-0809): a FAIL row is a draft that never passed and was never sent, so it is not "the last stamped draft".
+        if len(parts) >= 3 and parts[0] != "FAIL" and os.path.abspath(parts[2]) != os.path.abspath(draft_path) and os.path.isfile(parts[2]):
             return open(parts[2], encoding="utf-8", errors="replace").read()
     return None
 

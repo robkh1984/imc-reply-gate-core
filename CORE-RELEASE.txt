@@ -1,1 +1,1 @@
-imc-reply-gate core serial 15 (0.4.13): a reviewer Agent call must carry the fixed rubric in hooks/reviewer-rubric.txt word for word (OI-0808), so the verdict precheck enforces no longer depends on how the author asks.
+imc-reply-gate core serial 16 (0.4.14): REPEAT-TEXT no longer compares a draft with a FAIL stamp row, which is a draft that never passed and was never sent (OI-0809).
