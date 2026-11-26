@@ -25,7 +25,9 @@ REPO = "imc-reply-gate-core"
 URL = os.environ.get("IMC_RELEASE_LOCK_URL", "https://raw.githubusercontent.com/robkh1984/imc-reply-gate-core/main/RELEASE-LOCK")
 API = "https://api.github.com/repos/robkh1984/imc-reply-gate-core/contents/RELEASE-LOCK?ref=main"
 PUSH_VERB = re.compile(r"(\bgit\b[^|;&\n]*\bpush\b|\bgh\s+api\b[^|;&\n]*(-X\s*|--method\s+)(PUT|POST|PATCH|DELETE)|"
-                       r"push_files|create_or_update_file|GITHUB_(COMMIT|PUSH|CREATE_OR_UPDATE)[A-Z_]*)", re.I)
+                       r"push_files|create_or_update_file|GITHUB_(?!GET|LIST|SEARCH)[A-Z_]*(COMMIT|PUSH|REFERENCE|REF\b|TREE|BLOB|FILE|CONTENT)[A-Z_]*|"
+                       r"(git/(refs|commits|trees|blobs)|/contents/)[^\n]{0,400}?\"(method)\"\s*:\s*\"(PUT|POST|PATCH|DELETE)\"|"
+                       r"\"(method)\"\s*:\s*\"(PUT|POST|PATCH|DELETE)\"[^\n]{0,400}?(git/(refs|commits|trees|blobs)|/contents/))")
 GIT_PUSH = re.compile(r"\bgit\b(?P<pre>[^|;&\n]*?)\bpush\b")
 
 
@@ -47,6 +49,8 @@ def _origin(path):
 def is_release(tool, tinput, cwd=None):
     """True when this call would push to the core repository."""
     t = tinput if isinstance(tinput, dict) else {}
+    if tool in ("Write", "Edit", "MultiEdit", "NotebookEdit", "Read", "Grep", "Glob") or str(tool).endswith(("write_file", "edit_block", "read_file")):
+        return False  # writing or reading a file that mentions a push is not a push
     text = (tool or "") + " " + _text(t)
     if REPO in text and PUSH_VERB.search(text):
         return True
@@ -135,6 +139,13 @@ def selftest():
     t("REFUSED: gh api PUT on the core repo contents", check("Bash", {"command": "gh api -X PUT repos/robkh1984/imc-reply-gate-core/contents/MANIFEST.json -f message=x"}, "OTHER")[0], 2)
     t("REFUSED: Desktop Commander push on the Mac", check("mcp__remote-devices__Desktop_Commander__start_process", {"command": "cd ~/x/imc-reply-gate-core && git push", "timeout_ms": 1}, "OTHER", cwd=d)[0], 2)
     t("REFUSED: a GitHub MCP push_files to the core repo", check("mcp__github__push_files", {"repo": "imc-reply-gate-core", "owner": "robkh1984"}, "OTHER")[0], 2)
+    t("REFUSED: Composio proxy PATCH of git/refs on the core repo (the serial 17 route)", check("mcp__Composio_for_u__COMPOSIO_PROXY_EXECUTE", {"endpoint": "/repos/robkh1984/imc-reply-gate-core/git/refs/heads/main", "method": "PATCH", "body": {"sha": "abc"}}, "OTHER")[0], 2)
+    t("REFUSED: Composio GITHUB_UPDATE_A_REFERENCE on the core repo", check("mcp__Composio_for_u__COMPOSIO_MULTI_EXECUTE_TOOL", {"tools": [{"tool_slug": "GITHUB_UPDATE_A_REFERENCE", "arguments": {"repo": "imc-reply-gate-core", "ref": "heads/main"}}]}, "OTHER")[0], 2)
+    t("REFUSED: Composio GITHUB_CREATE_A_COMMIT on the core repo", check("mcp__Composio_for_u__COMPOSIO_MULTI_EXECUTE_TOOL", {"tools": [{"tool_slug": "GITHUB_CREATE_A_COMMIT", "arguments": {"repo": "imc-reply-gate-core"}}]}, "OTHER")[0], 2)
+    t("ALLOWED: Composio GITHUB_GET_A_REFERENCE read of the core repo", check("mcp__Composio_for_u__COMPOSIO_MULTI_EXECUTE_TOOL", {"tools": [{"tool_slug": "GITHUB_GET_A_REFERENCE", "arguments": {"repo": "imc-reply-gate-core", "ref": "heads/main"}}]}, "OTHER")[0], 0)
+    t("ALLOWED: Composio proxy GET of the core repo contents", check("mcp__Composio_for_u__COMPOSIO_PROXY_EXECUTE", {"endpoint": "/repos/robkh1984/imc-reply-gate-core/contents/MANIFEST.json", "method": "GET"}, "OTHER")[0], 0)
+    t("REFUSED: Composio proxy PUT of core repo contents", check("mcp__Composio_for_u__COMPOSIO_PROXY_EXECUTE", {"endpoint": "/repos/robkh1984/imc-reply-gate-core/contents/MANIFEST.json", "method": "PUT", "body": {"content": "x"}}, "OTHER")[0], 2)
+    t("ALLOWED: a Write of notes naming GITHUB_UPDATE_A_REFERENCE and the core repo", check("Write", {"file_path": "/tmp/n.md", "content": "imc-reply-gate-core was released by GITHUB_UPDATE_A_REFERENCE and git push"}, "OTHER")[0], 0)
     t("ALLOWED: git push in an unrelated repo", check("Bash", push, "OTHER", cwd=other)[0], 0)
     t("ALLOWED: reading the core repo (git log)", check("Bash", {"command": "git log --oneline | head"}, "OTHER", cwd=clone)[0], 0)
     t("ALLOWED: git clone of the core repo", check("Bash", {"command": "git clone https://github.com/robkh1984/imc-reply-gate-core x"}, "OTHER")[0], 0)

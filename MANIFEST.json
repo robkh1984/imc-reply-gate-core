@@ -1,7 +1,7 @@
 {
  "files": {
   ".claude-plugin/plugin.json": "4a14b857d1b7fe4afd535646ab9717d9ec8ee1570483c84e1c3d67bad7c4626f",
-  "CORE-RELEASE.txt": "45fb38bac6797fb2db1d96eb2cb415380038314b41b60c8252b9c01470bc906e",
+  "CORE-RELEASE.txt": "7161ff3545175394c26ced11ad0a25cebbd1ea4428c8d3bcfa28ddb357dca68e",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -75,10 +75,10 @@
   "hooks/intakeguard.py": "45175977a622f0eebfdc6637c4fb86f7c8e971ba7cecbc68ac78bb1a34b1d2dc",
   "hooks/ledger.py": "ef29fce8bfc7de58e5f90cdf1c63bec22c24bd0832ce148a49087eca2e684806",
   "hooks/preaction.py": "355997e4e4ba2776372c90fce91b3821bfca9e7bc9d66a1e5a5dc1fda5b459e4",
-  "hooks/releaselock.py": "642b629ceb641359674c895932f22a0a9fdf260756db52e5aea2ed619c8247e3",
+  "hooks/releaselock.py": "3389dc4a1673604520092a26bb1fbbdd4550b3d153b9e4798a0923a00d0a268a",
   "hooks/reviewer-rubric.txt": "63316a31e048614b378d71ab7f8ef3c40034f0b0356ffa8466972931b16838a6",
   "hooks/reviewpanel.py": "8acfa1569e8e4b995465cd0146a615af550824e9142ef26007eb33d765307bde"
  },
- "serial": 18,
- "version": "0.4.16"
+ "serial": 19,
+ "version": "0.4.17"
 }
