@@ -3856,9 +3856,8 @@ def check_prose_decision(text):
     if not ASK_IN_PROSE.search(text):
         return
     rows = _table_rows(text)
-    if not rows:
-        return
-    open_rob = [r for r in rows if _is_open(r[2]) and _is_rob(r[3])]
+    # OI-0826 (Rob 2026-11-27 "Approved"): a reply with no table that asks Rob in prose is checked too.
+    open_rob = [r for r in rows if _is_open(r[2]) and _is_rob(r[3])] if rows else []
     if not open_rob:
         m = ASK_IN_PROSE.search(text)
         fail("PROSE-DECISION",
