@@ -15,7 +15,7 @@ the same draft file name in this session. The counter file is ~/.claude/imc-revi
     python3 agentguard.py             hook mode (JSON on stdin; exit 2 = refuse, reason on stderr)
     python3 agentguard.py --selftest  controls; exit 0 all pass, 1 a control failed
 """
-import json, os, re, sys, tempfile
+import json, os, re, sys, tempfile, time
 
 LOOP = re.compile(r"\b(for|while)\b[^;\n]*;\s*do\b")
 EMITS = re.compile(r"\b(echo|printf)\b")
@@ -78,6 +78,49 @@ def _ledger_brief():
         return (m.RUNSH + m.LEDGER_NOTE).strip()
     except Exception:
         return ""
+
+
+# 0.4.25 (O4 "Model routing", Rob 2026-11-28 step 4: "add a gate warning (not a block) when an Agent call does
+# execution work with no model set"). Rule being enforced: Opus plans; multi-step execution, reviews and sub-runs go
+# to Sonnet or Haiku. A subagent with no model inherits the parent's model, so an Opus session silently runs its
+# execution steps on Opus. This WARNS and logs; it never refuses. A fork ignores the model field and a Plan agent is
+# planning, so neither warns.
+EXEC_WORK = re.compile(r"\b(run|runs|execute|edit|write|build|fix|implement|apply|commit|push|create|update|delete|"
+                       r"rename|move|install|test|tests|migrate|refactor|review|check|verify|read|search|grep|find|"
+                       r"list|scan|count|fetch|clone|compare|score|grade|audit)\b", re.I)
+NO_WARN_TYPES = ("fork", "plan")
+
+
+def _warnlog():
+    return os.environ.get("IMC_AGENTMODEL_LOG") or os.path.expanduser("~/.claude/imc-agentmodel-warn.tsv")
+
+
+def model_warning(tool, ti):
+    """None, or the warning text for an Agent call that does execution work with no model set."""
+    if tool != "Agent":
+        return None
+    ti = ti or {}
+    if str(ti.get("model") or "").strip():
+        return None
+    st = str(ti.get("subagent_type") or "").strip().lower()
+    if st in NO_WARN_TYPES:
+        return None
+    text = str(ti.get("prompt") or "") + " " + str(ti.get("description") or "")
+    if not EXEC_WORK.search(text):
+        return None
+    return ("AGENT-NO-MODEL (warning, not a block): this Agent call does execution work (subagent_type %s) with no "
+            "model set, so it inherits this session's model. Rob's routing rule: Opus plans; multi-step execution, "
+            "reviews and sub-runs go to Sonnet or Haiku (set model: \"sonnet\" or \"haiku\"); Fable 5.2 only for "
+            "hard synthesis; steps of one or two tool calls run directly" % (st or "default"))
+
+
+def log_warning(session, ti):
+    try:
+        with open(_warnlog(), "a") as f:
+            f.write("%s\t%s\tAGENT-NO-MODEL\t%s\t%s\n" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), session or "nosession",
+                    str((ti or {}).get("subagent_type") or "default"), " ".join(str((ti or {}).get("description") or "").split())[:80]))
+    except Exception:
+        pass
 
 
 def _norm(t):
@@ -151,7 +194,26 @@ def selftest():
         ("Monitor", {"command": "tail -f log | grep --line-buffered ERROR"}, "s1", False, "Monitor pipe, no loop"),
         ("Monitor", {"command": "while IFS= read -r l; do echo \"$l\"; done < <(tail -f log)"}, "s1", False, "Monitor streaming while read"),
     ]
+    wcases = [
+        ({"prompt": "Run the selftests and report counts", "description": "run selftests"}, True, "execution, no model, default type: warns"),
+        ({"prompt": "Run the selftests and report counts", "model": "sonnet"}, False, "execution with model sonnet: silent"),
+        ({"prompt": "Edit the file and commit", "model": "haiku", "subagent_type": "general-purpose"}, False, "execution with model haiku: silent"),
+        ({"prompt": "Edit the file and commit", "subagent_type": "general-purpose"}, True, "general-purpose execution, no model: warns"),
+        ({"prompt": "Edit the file and commit", "model": "  "}, True, "blank model counts as unset: warns"),
+        ({"prompt": "Design the architecture for the cache", "subagent_type": "Plan"}, False, "Plan agent: silent"),
+        ({"prompt": "Run the tests", "subagent_type": "fork"}, False, "fork ignores model: silent"),
+        ({"prompt": "Hello there"}, False, "no execution verb: silent"),
+        ({"prompt": rev}, True, "reviewer brief with no model: warns"),
+    ]
     ok = True
+    for ti, warn, label in wcases:
+        got = model_warning("Agent", dict(ti)) is not None
+        good = got == warn
+        ok = ok and good
+        print(("  ok    " if good else "  FAIL  ") + ("WARN  " if warn else "QUIET ") + label)
+    good = model_warning("Bash", {"command": "run tests"}) is None
+    ok = ok and good
+    print(("  ok    " if good else "  FAIL  ") + "QUIET other tool")
     global RUBRIC_PATH
     real = RUBRIC_PATH
     for tool, ti, sess, deny, label in cases:
@@ -176,6 +238,14 @@ def main():
     if why:
         sys.stderr.write("imc-reply-gate agentguard refused this call: %s. Nothing was started.\n" % why)
         return 2
+    try:
+        warn = model_warning(p.get("tool_name", ""), p.get("tool_input") or {})
+        if warn:
+            log_warning(p.get("session_id", ""), p.get("tool_input") or {})
+            sys.stdout.write(json.dumps({"systemMessage": warn, "hookSpecificOutput": {"hookEventName": "PreToolUse",
+                             "permissionDecision": "allow", "additionalContext": warn}}))
+    except Exception:
+        pass
     return 0
 
 

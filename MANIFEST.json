@@ -1,11 +1,12 @@
 {
  "files": {
   ".claude-plugin/plugin.json": "4a14b857d1b7fe4afd535646ab9717d9ec8ee1570483c84e1c3d67bad7c4626f",
-  "CORE-RELEASE.txt": "0b07bd540c00ac618ca1aaa97fedf780312f91ce5b01efadfa6303c7633ff85c",
+  "CORE-RELEASE.txt": "0b0468602a23346aad25d76cbaccdda02383998597748a8a138e2656647d2915",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
   "checker/acronyms.tsv": "9a4f4e7e087d202fdfb981be0cd45c524adf869fc9150753c7bcc2a33ae83335",
+  "checker/agentmodel_selftest.py": "57b4cc53850e54eb89c76d8a1a1f7dcde0b016d19c668f2b69737dcbeb14f341",
   "checker/alldone_open_selftest.py": "0ac68a083989b0d9ea479a4c76b8736665a4a48a1b210ecdfbf69753a4232cfd",
   "checker/answer_selftest.py": "2a25b467c0008b47fe8ecdb7eafcbac3becfc8f122d376171b5f6ffa5e443839",
   "checker/approvals-ledger.tsv": "bfde09e1125c2050e3aff7bf6427effc1ca26dd69c568ff4ceb40dc9bec26743",
@@ -117,7 +118,7 @@
   "checker/transcript_util.py": "fa5c6a2335ca433c6c4b4a08f27136282fa1abd98ea75ce86ee84e37c6022563",
   "checker/turnkey_selftest.py": "438da570e8ed36cd351dee4b962a4680b53654b1a9aadfd815e6874dc0a62c21",
   "checker/waivers.txt": "6e9b2198c01d2de17394fb943550dc0cb9c9911e5a1d2faa54c6292e8b74a786",
-  "hooks/agentguard.py": "0da9120884f7d1bff09ac4e33b39e05c5a8d6a62faf57fd048460a8f5ed86b4a",
+  "hooks/agentguard.py": "827e4ace54049f80041dda02d9c6991b88a0068f75a7dd7b0fc0f8e1228d60b8",
   "hooks/approvalledger.py": "6ab384d2f80cbced14544d6d58056d2f7a350f465f0ece49fe14b01b1926478e",
   "hooks/editlogguard.py": "424ae9c878619ddbd3b64c093d29c9b072e00c02c5abf0f4292d25d093627262",
   "hooks/gate.py": "0607ce3e3f65c8808a694362106ce4fbeb7362ebc7271a71ab5610cbede403fd",
@@ -129,6 +130,6 @@
   "hooks/reviewer-rubric.txt": "b6f505965fd3ffd0f5a9a3107412954c21979a1ca75e1c6dbb981a388746bca7",
   "hooks/reviewpanel.py": "d330db1faa5d2355c2fa66fc863d21387142904966cac979913978be143548cc"
  },
- "serial": 26,
- "version": "0.4.24"
+ "serial": 27,
+ "version": "0.4.25"
 }
