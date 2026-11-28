@@ -1,7 +1,7 @@
 {
  "files": {
   ".claude-plugin/plugin.json": "4a14b857d1b7fe4afd535646ab9717d9ec8ee1570483c84e1c3d67bad7c4626f",
-  "CORE-RELEASE.txt": "0b0468602a23346aad25d76cbaccdda02383998597748a8a138e2656647d2915",
+  "CORE-RELEASE.txt": "7052f80b516b386084d1e5d3034b0c43483b5a0eb74289837e7b919ef99ead02",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -124,12 +124,12 @@
   "hooks/gate.py": "0607ce3e3f65c8808a694362106ce4fbeb7362ebc7271a71ab5610cbede403fd",
   "hooks/guardguard.py": "0360b2a9b4b2827d7155421677436de2892e75b89f57d6dd1bc0ab2166391458",
   "hooks/intakeguard.py": "45175977a622f0eebfdc6637c4fb86f7c8e971ba7cecbc68ac78bb1a34b1d2dc",
-  "hooks/ledger.py": "7be41a66a5714cdad7a4efe7e7702e06112eef3d29d6be6198eea7523b1fd74f",
+  "hooks/ledger.py": "040567bc5bfafaea1a4a6c83f893eefbc73b778460a9566f8ca4db90fa7dd11c",
   "hooks/preaction.py": "355997e4e4ba2776372c90fce91b3821bfca9e7bc9d66a1e5a5dc1fda5b459e4",
   "hooks/releaselock.py": "8efd2a75bc97837ce962d7cce02c6d19afc61ffb6ea3cc472b2813a2fa1dca24",
   "hooks/reviewer-rubric.txt": "b6f505965fd3ffd0f5a9a3107412954c21979a1ca75e1c6dbb981a388746bca7",
   "hooks/reviewpanel.py": "d330db1faa5d2355c2fa66fc863d21387142904966cac979913978be143548cc"
  },
- "serial": 27,
- "version": "0.4.25"
+ "serial": 28,
+ "version": "0.4.26"
 }

@@ -87,6 +87,12 @@ def _flat(x):
 
 
 def input_summary(tool, ti):
+    # 0.4.26 (O4 "Model routing", Rob 2026-11-28 step 5: "execution steps show Sonnet or Haiku in evidence.log"): an
+    # Agent line now opens with the model it was started on (model=inherit when unset) and its subagent_type, so the
+    # ledger itself shows which model ran each delegated step; before this the line kept only the prompt.
+    if tool == "Agent" and isinstance(ti, dict):
+        return "model=%s subagent_type=%s prompt=%s" % (str(ti.get("model") or "inherit").strip() or "inherit",
+                                                         str(ti.get("subagent_type") or "default"), str(ti.get("prompt") or ""))
     if isinstance(ti, dict):
         for k in ("command", "file_path", "path", "pattern", "query", "url", "prompt", "message"):
             if ti.get(k):
@@ -236,6 +242,9 @@ def selftest():
     lp = path(S)
     lines = open(lp).read().splitlines()
     t("three hook lines written", len(lines), 3)
+    t("Agent line opens with its model (0.4.26, O4)", input_summary("Agent", {"model": "sonnet", "subagent_type": "general-purpose", "prompt": "run x"}), "model=sonnet subagent_type=general-purpose prompt=run x")
+    t("Agent line with no model says inherit (0.4.26, O4)", input_summary("Agent", {"prompt": "run x"}).split(" ")[0], "model=inherit")
+    t("Bash line unchanged (0.4.26)", input_summary("Bash", {"command": "ls"}), "command=ls")
     t("each line has 8 tab fields", [len(l.split("\t")) for l in lines], [8, 8, 8])
     t("time is Pacific", bool(re.search(r"\tP[SD]T\t|\d P[SD]T\t", lines[0])), True)
     t("a long output is cut to head and tail", "[..." in lines[2] and len(lines[2]) < 1400, True)
