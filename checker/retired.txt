@@ -1,0 +1,18 @@
+# O5 (Measure and prune), core serial 29 (Rob 2026-11-28, O5 brief step 7): closing-block checks retired because none
+# caught a real error in the demotion log. Evidence: ~/.claude/imc-reply-gate-demoted.tsv on Rob's Mac, 149 lines,
+# 2026-11-26 15:31:34 to 2026-11-28 00:38:12 PST; every hit of these codes flagged a missing or malformed retired
+# closing-block label, not a false or unsupported claim. Zero-hit codes are retired too: each checks only a retired
+# label. Read by checker/sixcol.py drop_retired(): a listed code is dropped silently. Rollback: delete its line.
+# KEPT WARNING until 2026-12-03 (not listed here): ABSENCE-CLAIM, NOT-RUN-CLAIM, SITE-FAULT, LEDGER-0, because each
+# judges a claim, not a label, and the log covers only prechecks run on the Mac.
+SELFCHECK	27 hits: 24 no SELF-CHECK line, 3 'drops to' wording; all label format
+PRE-SEND-REVIEW	17 hits: no PRE-SEND REVIEW line on a full or decision reply; the review itself still runs (ledgerreview)
+TABLE-AFTER-REVIEW	0 hits; places a retired line
+REVIEW-FIX-APPLIED	3 hits: wording of the retired PRE-SEND REVIEW line's fixed-row counts
+OBJECTIVE-SECTIONS	6 hits: no OBJECTIVE heading line above a table
+ROOTCAUSE	11 hits: no CAUSE: label in a row's Issue cell
+ROOT-CAUSE	0 hits; requires a retired ROOT CAUSE: line
+PREVENTS	14 hits: no Prevents recurrence: label, which the 6-column table has no column for
+MEASURED-LABEL	52 hits: a CHECKED: line naming no command; CHECKED: lines are retired
+ABOVE-TABLE-CAP	0 hits; a prose length cap from the retired format
+SENT-CHECKED	0 hits; requires a retired CHECKED: line quoting Rob

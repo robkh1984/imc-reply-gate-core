@@ -1,7 +1,7 @@
 {
  "files": {
   ".claude-plugin/plugin.json": "4a14b857d1b7fe4afd535646ab9717d9ec8ee1570483c84e1c3d67bad7c4626f",
-  "CORE-RELEASE.txt": "7052f80b516b386084d1e5d3034b0c43483b5a0eb74289837e7b919ef99ead02",
+  "CORE-RELEASE.txt": "36c60650d4af77582bd7385c7ee173d9d7da2d5b600ae10038773840ac146f01",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -101,6 +101,8 @@
   "checker/relevance_selftest.py": "6cd094189dd1b6448b6255b22c05a891a183c87cabba2813e5935bd1b3018192",
   "checker/replaycheck.py": "f2e34eb81fd9c86eb0aa6a56dff52d13129cd89755f840e80bc58f3bacad24fd",
   "checker/replycheck.py": "90e9c7b5ca98d0aeea1004f5bc20b9530322b317b655b72fa7fb2d19ad44cd55",
+  "checker/retired.txt": "f01738e7e8f9ca6af21f85a530e1b0cd2c45792ab25d01aaab44a30907876422",
+  "checker/retired_selftest.py": "baffba4390ca91c3346a00d296d11775a8d34992aa68f98e34f7b73bd112f9c1",
   "checker/rulingcovers_selftest.py": "0f8e2146b6c17ce20077f952ff19786fa4d2c2007125f074d801e2e15835776a",
   "checker/rulings-allow.tsv": "879e6829ca2d14024acbfbf15f7b7280487ad7f27abe8a2fa8ba9aa4eab79ebf",
   "checker/runbehind.py": "44e5542c3203e38e57a79db9b7fbcd48d80842670b0edd26cc4a8040a5e24782",
@@ -108,7 +110,7 @@
   "checker/scopecheck.py": "648009bd56d4b9d2fe58eb15de4f9c657aa9cb1f3942ae62736849a41393e59f",
   "checker/sendowned.py": "ab23774bbce075863b91012dec9e7d27fe7a949a9808555155f2ac68a7be2664",
   "checker/sendpath_selftest.py": "31e814b63d1ce0ea2b080df7d5e912b2e23719661bf67d8a6b9339bcf0e02ffe",
-  "checker/sixcol.py": "d7cea0455482d6986e4b344eaf20b1bda9e08783af85046a46f631626b323bd2",
+  "checker/sixcol.py": "4ab1b5a1fd95abb3c263bdf1dd910f1e91610b1e04b8b08d8997d004d9a95e9a",
   "checker/stopjson_selftest.py": "717dfed76e0496f8422c04178a7ef130cbc77ef74a174450ab4ed1c2137c621a",
   "checker/tablefinal_selftest.py": "bdfc3c0a57bf3012a395ddc8e2f4f8ee20e8265c0f27f13d9599103b7ccc2f6d",
   "checker/tablelost_selftest.py": "1a4aa1cc3520194a463d9722d313ab7a2570ee0c1c4fb6a77f9b6cfdfe66ee05",
@@ -130,6 +132,6 @@
   "hooks/reviewer-rubric.txt": "b6f505965fd3ffd0f5a9a3107412954c21979a1ca75e1c6dbb981a388746bca7",
   "hooks/reviewpanel.py": "d330db1faa5d2355c2fa66fc863d21387142904966cac979913978be143548cc"
  },
- "serial": 28,
- "version": "0.4.26"
+ "serial": 29,
+ "version": "0.4.27"
 }

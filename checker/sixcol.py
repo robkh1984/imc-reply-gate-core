@@ -130,8 +130,26 @@ def _log_demoted(hits):
         pass
 
 
+# ---------- RETIRED CLOSING-BLOCK CHECKS (O5 step 7, core serial 29) ----------
+# Rob 2026-11-28 (O5 brief, step 7): "retire each closing-block warning that never caught a real error; keep any that
+# did". checker/retired.txt lists the retired codes, CODE<TAB>evidence. A retired code is dropped from the fails
+# silently: no FAIL, no WARN, no demoted.tsv line. Rollback: delete a line from retired.txt and the code warns again.
+RETIRED_FILE = _os.path.join(HERE, "retired.txt")
+
+
+def retired_codes(path=None):
+    return set(demoted_codes(path or RETIRED_FILE))
+
+
+def drop_retired(fails, path=None):
+    """fails with every retired code removed (a new list)."""
+    r = retired_codes(path)
+    return [(c, m) for c, m in fails if c not in r]
+
+
 def demote(fails, warns, path=None):
     """Move every demoted code from fails (a list of (code, msg)) into warns, in place, and log each one."""
+    fails[:] = drop_retired(fails)
     codes = demoted_codes(path)
     hits = [(c, m) for c, m in fails if c in codes]
     if not hits:
@@ -149,6 +167,7 @@ def demote(fails, warns, path=None):
 def split_demoted(fails, path=None):
     """For callers holding a plain list: (kept, demoted)."""
     codes = demoted_codes(path)
+    fails = drop_retired(fails)
     return [(c, m) for c, m in fails if c not in codes], [(c, m) for c, m in fails if c in codes]
 
 
