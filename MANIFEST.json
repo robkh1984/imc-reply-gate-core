@@ -1,7 +1,7 @@
 {
  "files": {
   ".claude-plugin/plugin.json": "4a14b857d1b7fe4afd535646ab9717d9ec8ee1570483c84e1c3d67bad7c4626f",
-  "CORE-RELEASE.txt": "7f456ffc555683c434b1aee0a6b201efa86f5c07042b27520611026ecc810d35",
+  "CORE-RELEASE.txt": "0b07bd540c00ac618ca1aaa97fedf780312f91ce5b01efadfa6303c7633ff85c",
   "checker/.jargon-terms.tsv": "5ba32fb081a60d0d79e827317671edb202a677686004a42f7a262638af3cc412",
   "checker/.sent-mismatch-ack.tsv": "7ed8ce5da018d042da79c056598dd2b9477f59beb1ec171814540c1bf24dd6ee",
   "checker/acronym_check.py": "a6886d54e0ada7f2c1b7e0cd81f1db83b4a96d948b3741ed1297ed646b708184",
@@ -94,12 +94,12 @@
   "checker/precheck.py": "cf61a5ac1e39a611fc149b0b5d81a4c0a408502493821838c9cbc15c339b32fb",
   "checker/precheckshim_selftest.py": "8e6bf808b463c83102ba3920804e4bf698987aa3976d13be88e884bfc52eb07c",
   "checker/presendgate_selftest.py": "2ee23683020200870b473200560d19c8b0db138ae4f8e6aabd5bb263534ba587",
-  "checker/prosedecision_selftest.py": "f0335fde5227eaf3dff117ffb716e0d50870513eaf0eed8d62e071fbbfa38b10",
+  "checker/prosedecision_selftest.py": "f8f46f47eaddcc849efe1922d62b79997a70d99e9c54cb272d7cb432ddfa2220",
   "checker/pushdeny_selftest.py": "0a4d4ffb26446bf8d90b5940e7099166ed53db7e8418a3521f905f7aaf8081bb",
   "checker/recsupported_selftest.py": "70e3f1a5bee7e72f9a61218f30ff79d359d8bf060e9106aa0d0bd4ffae07380f",
   "checker/relevance_selftest.py": "6cd094189dd1b6448b6255b22c05a891a183c87cabba2813e5935bd1b3018192",
   "checker/replaycheck.py": "f2e34eb81fd9c86eb0aa6a56dff52d13129cd89755f840e80bc58f3bacad24fd",
-  "checker/replycheck.py": "4f9f453341eefe007bac2a21f970d2cf6d7e9a0b8cbcd578b1f2206c2db1c986",
+  "checker/replycheck.py": "90e9c7b5ca98d0aeea1004f5bc20b9530322b317b655b72fa7fb2d19ad44cd55",
   "checker/rulingcovers_selftest.py": "0f8e2146b6c17ce20077f952ff19786fa4d2c2007125f074d801e2e15835776a",
   "checker/rulings-allow.tsv": "879e6829ca2d14024acbfbf15f7b7280487ad7f27abe8a2fa8ba9aa4eab79ebf",
   "checker/runbehind.py": "44e5542c3203e38e57a79db9b7fbcd48d80842670b0edd26cc4a8040a5e24782",
@@ -129,6 +129,6 @@
   "hooks/reviewer-rubric.txt": "b6f505965fd3ffd0f5a9a3107412954c21979a1ca75e1c6dbb981a388746bca7",
   "hooks/reviewpanel.py": "d330db1faa5d2355c2fa66fc863d21387142904966cac979913978be143548cc"
  },
- "serial": 25,
- "version": "0.4.23"
+ "serial": 26,
+ "version": "0.4.24"
 }

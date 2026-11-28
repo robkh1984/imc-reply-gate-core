@@ -17,5 +17,6 @@ def chk(name, ok):
 ask = 'Waiting on your call for the classifier prompt (or an "unstamped is fine") before I send the corrected report.\n'
 chk("POSITIVE table-less prose ask -> PROSE-DECISION named", "PROSE-DECISION" in run(ask))
 chk("CONTROL table-less reply with no ask -> PROSE-DECISION absent", "PROSE-DECISION" not in run("The register row is filed; nothing is waiting on you.\n"))
+chk("POSITIVE (OI-0827) table-less Please approve -> PROSE-DECISION named", "PROSE-DECISION" in run("The run finished clean. Please approve the staged edit.\n"))
 print("PROSEDECISION SELFTEST " + ("OK" if not bad else "FAILED"))
 sys.exit(1 if bad else 0)

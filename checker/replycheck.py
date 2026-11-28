@@ -3828,7 +3828,8 @@ RATE_FIGURE = re.compile(r"\bfalse[- ]positives?\b|\d+(\.\d+)?\s*(percent|%)", r
 
 ASK_IN_PROSE = re.compile(
     r"(say the word|let me know|tell me whether|tell me which|if you(?:'| ha)ve already|"
-    r"just say|your call|do you want me to|shall I|want me to)", re.I)
+    r"just say|your call|do you want me to|shall I|want me to|please (?:approve|decide|confirm|choose|reply)|"
+    r"approve or decline|decide whether|do you approve|needs? your (?:approval|decision))", re.I)
 
 
 def check_prose_decision(text):
